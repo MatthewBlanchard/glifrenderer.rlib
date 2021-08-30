@@ -8,7 +8,7 @@ edition = "2018"
 [dependencies]
 glifparser = { git = "https://github.com/MFEK/glifparser.rlib", branch = "master", features=["skia", "mfek"] }
 skulpin = { git = "https://github.com/MFEK/skulpin" }
-skulpin-renderer = {git = "https://github.com/MFEK/skulpin/skulpin-renderer"}
+skulpin-renderer = {git = "https://github.com/MFEK/skulpin/"}
 log = "0.4"
 font-kit = "0.10"
 derive_more = "0.99"
