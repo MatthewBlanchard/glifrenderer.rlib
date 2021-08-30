@@ -1,5 +1,5 @@
 use derive_more::Display;
-use enum_iterator::IntoEnumIterator;
+use enum_unitary::IntoEnumIterator;
 
 #[derive(IntoEnumIterator, Display, Debug, Clone, Copy, PartialEq)]
 pub enum HandleStyle {
