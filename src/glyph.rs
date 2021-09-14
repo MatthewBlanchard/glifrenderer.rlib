@@ -1,11 +1,16 @@
 use super::constants::*;
 use super::points::calc::*;
 
-use glifparser::{MFEKGlif, glif::{LayerOperation, MFEKPointData}, outline::skia::{SkiaPointTransforms}};
-use skulpin::skia_safe::{Canvas, Color4f, Paint, PaintStyle, Path, PathOp, Rect};
-use crate::{string::UiString, toggles::PreviewMode};
 use crate::viewport::Viewport;
+use crate::{string::UiString, toggles::PreviewMode};
 use glifparser::outline::skia::ToSkiaPaths;
+use glifparser::{
+    glif::{LayerOperation, MFEKPointData},
+    outline::skia::SkiaPointTransforms,
+    MFEKGlif,
+};
+use skulpin::skia_bindings::SkPath;
+use skulpin::skia_safe::{Canvas, Color4f, Handle, Paint, PaintStyle, Path, PathOp, Rect};
 
 pub fn draw_components(glyph: &MFEKGlif<MFEKPointData>, viewport: &Viewport, canvas: &mut Canvas) {
     let mut paint = Paint::default();
@@ -36,10 +41,58 @@ pub fn draw_components(glyph: &MFEKGlif<MFEKPointData>, viewport: &Viewport, can
     canvas.draw_path(&path, &paint);
 }
 
+pub fn draw_layer_group(
+    viewport: &Viewport,
+    canvas: &mut Canvas,
+    root_color: Option<Color4f>,
+    active_path: &Handle<SkPath>,
+    open_path: &Handle<SkPath>,
+    closed_path: &Handle<SkPath>,
+    outline_path: &Handle<SkPath>,
+) {
+    let mut paint = Paint::default();
+    paint.set_anti_alias(true);
+
+    if viewport.preview_mode == PreviewMode::Paper {
+        paint.set_style(PaintStyle::Fill);
+    } else {
+        paint.set_style(PaintStyle::StrokeAndFill);
+        paint.set_color(OUTLINE_FILL);
+        paint.set_stroke_width(OUTLINE_STROKE_THICKNESS * (1. / viewport.factor));
+    }
+
+    if let Some(color) = root_color {
+        paint.set_color4f(color, None);
+    } else if viewport.preview_mode == PreviewMode::Paper {
+        println!("YEET");
+        paint.set_color(PAPER_FILL);
+    }
+
+    canvas.draw_path(&closed_path, &paint);
+
+    paint.set_style(PaintStyle::Stroke);
+    canvas.draw_path(&open_path, &paint);
+
+    if viewport.preview_mode != PreviewMode::Paper {
+        paint.set_style(PaintStyle::Stroke);
+
+        if root_color.is_none() {
+            paint.set_color(OUTLINE_STROKE);
+        }
+        canvas.draw_path(&closed_path, &paint);
+        canvas.draw_path(&outline_path, &paint);
+    }
+}
+
 //TODO: pub use crate::events::vws;
 // Before we draw we've got to build a flattened path out of the glyph by resolving
 // each layer operation in turn.
-pub fn draw(canvas: &mut Canvas, glyph: &MFEKGlif<MFEKPointData>, viewport: &Viewport, active_layer: usize) -> Path {
+pub fn draw(
+    canvas: &mut Canvas,
+    glyph: &MFEKGlif<MFEKPointData>,
+    viewport: &Viewport,
+    active_layer: usize,
+) -> Path {
     let mut active_path = Path::new();
     let mut total_open_path = Path::new();
     let mut total_closed_path = Path::new();
@@ -61,36 +114,15 @@ pub fn draw(canvas: &mut Canvas, glyph: &MFEKGlif<MFEKPointData>, viewport: &Vie
         }
 
         if layer.operation.is_none() && layer_idx != 0 {
-            let mut paint = Paint::default();
-            paint.set_anti_alias(true);
-
-            if viewport.preview_mode == PreviewMode::Paper {
-                paint.set_style(PaintStyle::Fill);
-            } else {
-                paint.set_style(PaintStyle::StrokeAndFill);
-                paint.set_color(OUTLINE_FILL);
-                paint.set_stroke_width(OUTLINE_STROKE_THICKNESS * (1. / viewport.factor));
-            }
-
-            if let Some(color) = root_color {
-                paint.set_color4f(color, None);
-            }
-
-            if viewport.preview_mode != PreviewMode::Paper {
-                paint.set_color(OUTLINE_STROKE);
-                if let Some(color) = root_color {
-                    paint.set_color4f(color, None);
-                }
-                canvas.draw_path(&total_closed_path, &paint);
-
-                paint.set_style(PaintStyle::Stroke);
-                canvas.draw_path(&total_open_path, &paint);
-            } else {
-                canvas.draw_path(&total_closed_path, &paint);
-
-                paint.set_style(PaintStyle::Stroke);
-                canvas.draw_path(&total_open_path, &paint);
-            }
+            draw_layer_group(
+                viewport,
+                canvas,
+                root_color,
+                &active_path,
+                &total_open_path,
+                &total_closed_path,
+                &total_outline_path,
+            );
 
             total_open_path = Path::new();
             total_closed_path = Path::new();
@@ -178,37 +210,15 @@ pub fn draw(canvas: &mut Canvas, glyph: &MFEKGlif<MFEKPointData>, viewport: &Vie
         }
     }
 
-    let mut paint = Paint::default();
-    paint.set_anti_alias(true);
-
-    if viewport.preview_mode == PreviewMode::Paper {
-        paint.set_style(PaintStyle::Fill);
-    } else {
-        paint.set_style(PaintStyle::StrokeAndFill);
-        paint.set_color(OUTLINE_FILL);
-        paint.set_stroke_width(OUTLINE_STROKE_THICKNESS * (1. / viewport.factor));
-    }
-
-    if let Some(color) = root_color {
-        paint.set_color4f(color, None);
-    } else if viewport.preview_mode == PreviewMode::Paper {
-        paint.set_color(PAPER_FILL);
-    }
-
-    canvas.draw_path(&total_closed_path, &paint);
-
-    paint.set_style(PaintStyle::Stroke);
-    canvas.draw_path(&total_open_path, &paint);
-
-    if viewport.preview_mode != PreviewMode::Paper {
-        paint.set_style(PaintStyle::Stroke);
-
-        if root_color.is_none() {
-            paint.set_color(OUTLINE_STROKE);
-        }
-        canvas.draw_path(&total_closed_path, &paint);
-        canvas.draw_path(&total_outline_path, &paint);
-    }
-
+    draw_layer_group(
+        viewport,
+        canvas,
+        root_color,
+        &active_path,
+        &total_open_path,
+        &total_closed_path,
+        &total_outline_path,
+    );
+    
     return active_path;
 }
