@@ -64,7 +64,6 @@ pub fn draw_layer_group(
     if let Some(color) = root_color {
         paint.set_color4f(color, None);
     } else if viewport.preview_mode == PreviewMode::Paper {
-        println!("YEET");
         paint.set_color(PAPER_FILL);
     }
 
@@ -219,6 +218,6 @@ pub fn draw(
         &total_closed_path,
         &total_outline_path,
     );
-    
+
     return active_path;
 }
