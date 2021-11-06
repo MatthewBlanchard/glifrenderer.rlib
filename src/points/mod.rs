@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 use glifparser::glif::MFEKPointData;
 use skulpin::skia_safe::{
-    Canvas, ContourMeasureIter, Matrix, Paint, PaintStyle, Path, Point, Rect, Vector,
+    Canvas, ContourMeasureIter, Matrix, Paint, PaintStyle, Path as SkPath, Point as SkPoint, Rect as SkRect, Vector,
 };
 pub mod calc;
 use self::calc::*;
@@ -25,12 +25,12 @@ pub enum UIPointType {
 }
 
 trait SkiaFromGlyph<PD: GPPointData> {
-    fn from_glif(p: &GPPoint<PD>) -> Point;
+    fn from_glif(p: &GPPoint<PD>) -> SkPoint;
 }
 
-impl<PD: GPPointData> SkiaFromGlyph<PD> for Point {
+impl<PD: GPPointData> SkiaFromGlyph<PD> for SkPoint {
     fn from_glif(p: &GPPoint<PD>) -> Self {
-        Point::from((calc_x(p.x), calc_y(p.y)))
+        SkPoint::from((calc_x(p.x), calc_y(p.y)))
     }
 }
 
@@ -62,7 +62,7 @@ fn get_fill_and_stroke(kind: UIPointType, selected: bool) -> (Color, Color) {
     (fill, stroke)
 }
 
-pub fn draw_directions(viewport: &Viewport, path: Path, canvas: &mut Canvas) {
+pub fn draw_directions(viewport: &Viewport, path: SkPath, canvas: &mut Canvas) {
     let piter = ContourMeasureIter::from_path(&path, false, None);
     for cm in piter {
         // Get vector and tangent -4 Skia units along the contur
@@ -78,7 +78,7 @@ pub fn draw_directions(viewport: &Viewport, path: Path, canvas: &mut Canvas) {
 // point (on the base), finish that segment, and close the path.
 fn draw_triangle_point(
     viewport: &Viewport,
-    at: Point,
+    at: SkPoint,
     along: Vector,
     selected: bool,
     canvas: &mut Canvas,
@@ -89,8 +89,8 @@ fn draw_triangle_point(
     paint.set_stroke_width(DIRECTION_STROKE_THICKNESS * (1. / factor));
     paint.set_anti_alias(true);
 
-    let mut path = Path::new();
-    let mut path1 = Path::new();
+    let mut path = SkPath::new();
+    let mut path1 = SkPath::new();
 
     let mut vec = along.clone();
     vec.set_length(TRIANGLE_POINT_AREA * (1. / factor));
@@ -102,7 +102,7 @@ fn draw_triangle_point(
 
     path1.move_to(at + vec);
     path1.line_to(at);
-    let mut path2 = Path::new();
+    let mut path2 = SkPath::new();
     //vec.set_length(10.);
     vec.set_length(TRIANGLE_POINT_AREA * 2. * (1. / factor));
     path2.move_to(at + vec);
@@ -110,11 +110,11 @@ fn draw_triangle_point(
     path2.transform(&matrix);
 
     let points1_count = path1.count_points();
-    let mut points1 = vec![Point::default(); points1_count];
+    let mut points1 = vec![SkPoint::default(); points1_count];
     path1.get_points(&mut points1);
 
     let points2_count = path2.count_points();
-    let mut points2 = vec![Point::default(); points2_count];
+    let mut points2 = vec![SkPoint::default(); points2_count];
     path2.get_points(&mut points2);
 
     path.move_to(points2[1]);
@@ -165,10 +165,10 @@ pub fn draw_square_point(
     let (fill, stroke) = get_fill_and_stroke(kind, selected);
     let radius = (POINT_RADIUS * (1. / factor)) * 2. * if selected { 1.75 } else { 1. };
 
-    let mut path = Path::new();
+    let mut path = SkPath::new();
     paint.set_color(fill);
     path.add_rect(
-        Rect::from_point_and_size((at.0 - radius / 2., at.1 - radius / 2.), (radius, radius)),
+        SkRect::from_point_and_size((at.0 - radius / 2., at.1 - radius / 2.), (radius, radius)),
         None,
     );
     path.close();
@@ -253,7 +253,7 @@ pub fn draw_handlebars<PD: GPPointData>(
     selected: bool,
     canvas: &mut Canvas,
 ) {
-    let mut path = Path::new();
+    let mut path = SkPath::new();
     let mut paint = Paint::default();
 
     paint.set_anti_alias(true);
