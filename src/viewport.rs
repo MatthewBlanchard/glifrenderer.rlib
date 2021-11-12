@@ -1,6 +1,6 @@
 use skulpin::skia_safe::{Canvas, Matrix};
 use crate::toggles::{PointLabels, HandleStyle, PreviewMode};
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Viewport {
     pub winsize: (f32, f32),
     pub factor: f32,
