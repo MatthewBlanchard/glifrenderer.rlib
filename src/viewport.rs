@@ -25,6 +25,37 @@ impl Default for Viewport {
     }
 }
 
+impl Viewport {
+    pub fn with_winsize(mut self, winsize: (f32, f32)) -> Self {
+        self.winsize = winsize;
+        self
+    }
+    pub fn with_factor(mut self, factor: f32) -> Self {
+        self.factor = factor;
+        self
+    }
+    pub fn with_offset(mut self, offset: (f32, f32)) -> Self {
+        self.offset = offset;
+        self
+    }
+    pub fn with_dpi(mut self, dpi: f64) -> Self {
+        self.dpi = dpi;
+        self
+    }
+    pub fn with_point_labels(mut self, point_labels: PointLabels) -> Self {
+        self.point_labels = point_labels;
+        self
+    }
+    pub fn with_handle_style(mut self, handle_style: HandleStyle) -> Self {
+        self.handle_style = handle_style;
+        self
+    }
+    pub fn with_preview_mode(mut self, preview_mode: PreviewMode) -> Self {
+        self.preview_mode = preview_mode;
+        self
+    }
+}
+
 pub fn redraw_viewport(view: &Viewport, canvas: &mut Canvas) {
     let mut matrix = Matrix::new_identity();
     let now_matrix = canvas.local_to_device_as_3x3();
