@@ -1,15 +1,18 @@
 use std::collections::HashSet;
 use glifparser::glif::MFEKPointData;
+use glifparser::outline::skia::ToSkiaPath;
 use skulpin::skia_safe::{
     Canvas, ContourMeasureIter, Matrix, Paint, PaintStyle, Path as SkPath, Point as SkPoint, Rect as SkRect, Vector,
 };
+
 pub mod calc;
-use self::calc::*;
 pub mod names;
 
+use self::calc::*;
 use super::constants::*;
 use crate::toggles::{HandleStyle, PointLabels};
 use crate::viewport::Viewport;
+use crate::SKIA_POINT_TRANSFORMS;
 
 use glifparser::{MFEKGlif, Handle as GPHandle, Point as GPPoint, PointData as GPPointData, PointType as GPPointType};
 
@@ -62,13 +65,19 @@ fn get_fill_and_stroke(kind: UIPointType, selected: bool) -> (Color, Color) {
     (fill, stroke)
 }
 
-pub fn draw_directions(viewport: &Viewport, path: SkPath, canvas: &mut Canvas) {
-    let piter = ContourMeasureIter::from_path(&path, false, None);
-    for cm in piter {
-        // Get vector and tangent -4 Skia units along the contur
-        let (vec, tan) = cm.pos_tan(-4.).unwrap();
-        draw_triangle_point(viewport, vec, tan, false, canvas);
-    }
+pub fn draw_directions(viewport: &Viewport, glyph: &MFEKGlif<MFEKPointData>, canvas: &mut Canvas) {
+    glyph.layers.iter().for_each(|o| {
+        for c in &o.outline {
+            drop(c.inner.to_skia_path(SKIA_POINT_TRANSFORMS).as_ref().map(|p| {
+                let piter = ContourMeasureIter::from_path(p, false, None);
+                for cm in piter {
+                    // Get vector and tangent -4 Skia units along the contur
+                    let (vec, tan) = cm.pos_tan(-4.).unwrap();
+                    draw_triangle_point(viewport, vec, tan, false, canvas);
+                }
+            }));
+        }
+    });
 }
 
 // For direction markers, not a "real" point So, we make three paths. `path` we return; `path2` is

@@ -3,10 +3,11 @@ use super::points::calc::*;
 
 use crate::viewport::Viewport;
 use crate::{string::UiString, toggles::PreviewMode};
+use crate::SKIA_POINT_TRANSFORMS;
+
 use glifparser::outline::skia::ToSkiaPaths;
 use glifparser::{
     glif::{LayerOperation, MFEKPointData},
-    outline::skia::SkiaPointTransforms,
     MFEKGlif,
 };
 use skulpin::skia_bindings::SkPath;
@@ -36,7 +37,7 @@ pub fn draw_components(glyph: &MFEKGlif<MFEKPointData>, viewport: &Viewport, can
     let skpaths = glyph
         .flattened
         .as_ref()
-        .map(|f| f.to_skia_paths(Some(SkiaPointTransforms { calc_x, calc_y })));
+        .map(|f| f.to_skia_paths(SKIA_POINT_TRANSFORMS));
     skpaths.map(|skp| skp.closed.map(|skpc| canvas.draw_path(&skpc, &paint)));
     canvas.draw_path(&path, &paint);
 }
@@ -89,9 +90,7 @@ pub fn draw(
     canvas: &mut Canvas,
     glyph: &MFEKGlif<MFEKPointData>,
     viewport: &Viewport,
-    active_layer: usize,
-) -> Path {
-    let mut active_path = Path::new();
+) {
     let mut total_open_path = Path::new();
     let mut total_closed_path = Path::new();
     let mut total_outline_path = Path::new();
@@ -137,14 +136,7 @@ pub fn draw(
             };
         }
 
-        let skpaths = layer.outline.to_skia_paths(Some(SkiaPointTransforms {
-            calc_x: calc_x,
-            calc_y: calc_y,
-        }));
-
-        if layer_idx == active_layer {
-            active_path = skpaths.clone().into();
-        }
+        let skpaths = layer.outline.to_skia_paths(SKIA_POINT_TRANSFORMS);
 
         if let Some(op) = &layer.operation {
             let pathop = match op {
@@ -215,6 +207,4 @@ pub fn draw(
         &total_closed_path,
         &total_outline_path,
     );
-
-    return active_path;
 }
