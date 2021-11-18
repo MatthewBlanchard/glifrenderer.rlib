@@ -1,5 +1,5 @@
 use std::collections::HashSet;
-use glifparser::glif::MFEKPointData;
+use glifparser::glif::{Layer, MFEKPointData};
 use glifparser::outline::skia::ToSkiaPath;
 use skulpin::skia_safe::{
     Canvas, ContourMeasureIter, Matrix, Paint, PaintStyle, Path as SkPath, Point as SkPoint, Rect as SkRect, Vector,
@@ -65,19 +65,17 @@ fn get_fill_and_stroke(kind: UIPointType, selected: bool) -> (Color, Color) {
     (fill, stroke)
 }
 
-pub fn draw_directions(viewport: &Viewport, glyph: &MFEKGlif<MFEKPointData>, canvas: &mut Canvas) {
-    glyph.layers.iter().for_each(|o| {
-        for c in &o.outline {
-            drop(c.inner.to_skia_path(SKIA_POINT_TRANSFORMS).as_ref().map(|p| {
-                let piter = ContourMeasureIter::from_path(p, false, None);
-                for cm in piter {
-                    // Get vector and tangent -4 Skia units along the contur
-                    let (vec, tan) = cm.pos_tan(-4.).unwrap();
-                    draw_triangle_point(viewport, vec, tan, false, canvas);
-                }
-            }));
-        }
-    });
+pub fn draw_directions(viewport: &Viewport, layer: &Layer<MFEKPointData>, canvas: &mut Canvas) {
+    for c in &layer.outline {
+        drop(c.inner.to_skia_path(SKIA_POINT_TRANSFORMS).as_ref().map(|p| {
+            let piter = ContourMeasureIter::from_path(p, false, None);
+            for cm in piter {
+                // Get vector and tangent -4 Skia units along the contur
+                let (vec, tan) = cm.pos_tan(-4.).unwrap();
+                draw_triangle_point(viewport, vec, tan, false, canvas);
+            }
+        }));
+    }
 }
 
 // For direction markers, not a "real" point So, we make three paths. `path` we return; `path2` is
