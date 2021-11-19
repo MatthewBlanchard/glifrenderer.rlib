@@ -2,8 +2,8 @@ use super::constants::*;
 use super::points::calc::*;
 
 use crate::viewport::Viewport;
-use crate::{string::UiString, toggles::PreviewMode};
 use crate::SKIA_POINT_TRANSFORMS;
+use crate::{string::UiString, toggles::PreviewMode};
 
 use glifparser::outline::skia::ToSkiaPaths;
 use glifparser::{
@@ -86,11 +86,7 @@ pub fn draw_layer_group(
 //TODO: pub use crate::events::vws;
 // Before we draw we've got to build a flattened path out of the glyph by resolving
 // each layer operation in turn.
-pub fn draw(
-    canvas: &mut Canvas,
-    glyph: &MFEKGlif<MFEKPointData>,
-    viewport: &Viewport,
-) {
+pub fn draw(canvas: &mut Canvas, glyph: &MFEKGlif<MFEKPointData>, viewport: &Viewport) {
     let mut total_open_path = Path::new();
     let mut total_closed_path = Path::new();
     let mut total_outline_path = Path::new();

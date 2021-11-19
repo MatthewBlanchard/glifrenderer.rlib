@@ -1,9 +1,10 @@
-use std::collections::HashSet;
 use glifparser::glif::{Layer, MFEKPointData};
 use glifparser::outline::skia::ToSkiaPath;
 use skulpin::skia_safe::{
-    Canvas, ContourMeasureIter, Matrix, Paint, PaintStyle, Path as SkPath, Point as SkPoint, Rect as SkRect, Vector,
+    Canvas, ContourMeasureIter, Matrix, Paint, PaintStyle, Path as SkPath, Point as SkPoint,
+    Rect as SkRect, Vector,
 };
+use std::collections::HashSet;
 
 pub mod calc;
 pub mod names;
@@ -14,7 +15,10 @@ use crate::toggles::{HandleStyle, PointLabels};
 use crate::viewport::Viewport;
 use crate::SKIA_POINT_TRANSFORMS;
 
-use glifparser::{MFEKGlif, Handle as GPHandle, Point as GPPoint, PointData as GPPointData, PointType as GPPointType};
+use glifparser::{
+    Handle as GPHandle, MFEKGlif, Point as GPPoint, PointData as GPPointData,
+    PointType as GPPointType,
+};
 
 type Color = u32;
 
@@ -68,14 +72,19 @@ fn get_fill_and_stroke(kind: UIPointType, selected: bool) -> (Color, Color) {
 
 pub fn draw_directions(viewport: &Viewport, layer: &Layer<MFEKPointData>, canvas: &mut Canvas) {
     for c in &layer.outline {
-        drop(c.inner.to_skia_path(SKIA_POINT_TRANSFORMS).as_ref().map(|p| {
-            let piter = ContourMeasureIter::from_path(p, false, None);
-            for cm in piter {
-                // Get vector and tangent -4 Skia units along the contur
-                let (vec, tan) = cm.pos_tan(-4.).unwrap();
-                draw_triangle_point(viewport, vec, tan, false, canvas);
-            }
-        }));
+        drop(
+            c.inner
+                .to_skia_path(SKIA_POINT_TRANSFORMS)
+                .as_ref()
+                .map(|p| {
+                    let piter = ContourMeasureIter::from_path(p, false, None);
+                    for cm in piter {
+                        // Get vector and tangent -4 Skia units along the contur
+                        let (vec, tan) = cm.pos_tan(-4.).unwrap();
+                        draw_triangle_point(viewport, vec, tan, false, canvas);
+                    }
+                }),
+        );
     }
 }
 

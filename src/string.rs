@@ -1,8 +1,8 @@
 use skulpin::skia_safe::{Canvas, Font, FontStyle, Paint, Path, Rect, TextBlob, Typeface};
 
+use crate::viewport::Viewport;
 use std::cell::RefCell;
 use std::collections::HashMap;
-use crate::viewport::Viewport;
 
 use super::constants::*;
 

@@ -5,8 +5,8 @@ use super::points::calc::*;
 use glifparser::glif::MFEKPointData;
 use skulpin::skia_safe::{Canvas, Color, Paint, PaintStyle, Path};
 
-use glifparser::{IntegerOrFloat, MFEKGlif};
 use glifparser::{Guideline, GuidelinePoint};
+use glifparser::{IntegerOrFloat, MFEKGlif};
 
 pub fn draw_guideline(
     viewport: &Viewport,
