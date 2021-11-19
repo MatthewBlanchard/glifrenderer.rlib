@@ -12,7 +12,7 @@ pub static HANDLE_STROKE_THICKNESS: f32 = 2.5 * PEN_SIZE;
 pub static POINT_RADIUS: f32 = 5. * PEN_SIZE;
 /// Triangles aren't really points, but we internally treat them as such. They represent directions.
 /// Also it's a factor, the area isn't *literally* six pixels even on DPI 1.0 :-)
-pub static TRIANGLE_POINT_AREA: f32 = (POINT_RADIUS + 1.) * PEN_SIZE;
+pub static TRIANGLE_POINT_AREA: f32 = ((POINT_RADIUS + 1.) * 0.8) * PEN_SIZE;
 pub static HANDLE_RADIUS: f32 = 2.5 * PEN_SIZE;
 pub static HANDLEBAR_THICKNESS: f32 = 3. * PEN_SIZE;
 pub static ANCHOR_RADIUS: f32 = 15.;
@@ -23,6 +23,8 @@ pub static OUTLINE_FILL: u32 = 0xff_666666;
 pub static OUTLINE_STROKE: u32 = 0xff_000000;
 pub static POINT_SQUARE_FILL: u32 = 0xff_6ae755;
 pub static POINT_SQUARE_STROKE: u32 = 0xff_208e53;
+pub static DIRECTION_FILL: u32 = 0xff_a2e758;
+pub static DIRECTION_STROKE: u32 = 0xff_5c8e23;
 // One and two refers to number of Bezier handles.
 pub static POINT_ONE_FILL: u32 = 0xff_44cf8c;
 pub static POINT_ONE_STROKE: u32 = 0xff_1d8a84;

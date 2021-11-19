@@ -38,30 +38,31 @@ impl<PD: GPPointData> SkiaFromGlyph<PD> for SkPoint {
 }
 
 fn get_fill_and_stroke(kind: UIPointType, selected: bool) -> (Color, Color) {
-    let (fill, stroke) =
-        if selected {
-            match kind {
-                UIPointType::GPHandle => (SELECTED_OFFCURVE, SELECTED_OFFCURVE_STROKE),
-                UIPointType::Point((GPHandle::At(_, _), GPHandle::Colocated))
-                | UIPointType::Point((GPHandle::Colocated, GPHandle::At(_, _))) => {
-                    (SELECTED_STROKE, SELECTED_TERTIARY)
-                }
-                UIPointType::Point((GPHandle::Colocated, GPHandle::Colocated))
-                | UIPointType::Direction => (SELECTED_STROKE, SELECTED_TERTIARY),
-                _ => (SELECTED_FILL, SELECTED_STROKE),
+    let (fill, stroke) = if selected {
+        match kind {
+            UIPointType::GPHandle => (SELECTED_OFFCURVE, SELECTED_OFFCURVE_STROKE),
+            UIPointType::Point((GPHandle::At(_, _), GPHandle::Colocated))
+            | UIPointType::Point((GPHandle::Colocated, GPHandle::At(_, _))) => {
+                (SELECTED_STROKE, SELECTED_TERTIARY)
             }
-        } else {
-            match kind {
-                UIPointType::GPHandle => (HANDLE_FILL, HANDLE_STROKE),
-                UIPointType::Point((GPHandle::At(_, _), GPHandle::Colocated))
-                | UIPointType::Point((GPHandle::Colocated, GPHandle::At(_, _))) => {
-                    (POINT_ONE_FILL, POINT_ONE_STROKE)
-                }
-                UIPointType::Point((GPHandle::Colocated, GPHandle::Colocated))
-                | UIPointType::Direction => (POINT_SQUARE_FILL, POINT_SQUARE_STROKE),
-                _ => (POINT_TWO_FILL, POINT_TWO_STROKE),
+            UIPointType::Point((GPHandle::Colocated, GPHandle::Colocated))
+            | UIPointType::Direction => (SELECTED_STROKE, SELECTED_TERTIARY),
+            _ => (SELECTED_FILL, SELECTED_STROKE),
+        }
+    } else {
+        match kind {
+            UIPointType::GPHandle => (HANDLE_FILL, HANDLE_STROKE),
+            UIPointType::Point((GPHandle::At(_, _), GPHandle::Colocated))
+            | UIPointType::Point((GPHandle::Colocated, GPHandle::At(_, _))) => {
+                (POINT_ONE_FILL, POINT_ONE_STROKE)
             }
-        };
+            UIPointType::Direction => (DIRECTION_FILL, DIRECTION_STROKE),
+            UIPointType::Point((GPHandle::Colocated, GPHandle::Colocated)) => {
+                (POINT_SQUARE_FILL, POINT_SQUARE_STROKE)
+            }
+            _ => (POINT_TWO_FILL, POINT_TWO_STROKE),
+        }
+    };
     (fill, stroke)
 }
 
