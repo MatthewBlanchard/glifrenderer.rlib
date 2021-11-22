@@ -1,5 +1,6 @@
 use crate::toggles::{HandleStyle, PointLabels, PreviewMode};
 use skulpin::skia_safe::{Canvas, Matrix};
+
 #[derive(Clone, Debug)]
 pub struct Viewport {
     pub winsize: (f32, f32),
@@ -59,7 +60,9 @@ impl Viewport {
 pub fn redraw_viewport(view: &Viewport, canvas: &mut Canvas) {
     let mut matrix = Matrix::new_identity();
     let now_matrix = canvas.local_to_device_as_3x3();
-    matrix.set_scale_translate((view.factor, view.factor), view.offset);
+    let trans_p = now_matrix.map_point(view.offset);
+
+    matrix.set_scale_translate((view.factor, view.factor), trans_p);
 
     if matrix != now_matrix {
         canvas.set_matrix(&matrix.into());
