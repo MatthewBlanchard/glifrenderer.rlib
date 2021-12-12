@@ -3,6 +3,9 @@
 
 use std::f32::consts::PI;
 
+/* General purpose multiplier */
+pub const PEN_SIZE: f32 = 1.0;
+
 /* Sizes */
 pub static OUTLINE_STROKE_THICKNESS: f32 = 1.5 * PEN_SIZE;
 pub static GUIDELINE_THICKNESS: f32 = OUTLINE_STROKE_THICKNESS;
@@ -16,8 +19,9 @@ pub static POINT_RADIUS: f32 = 5. * PEN_SIZE;
 pub static TRIANGLE_POINT_AREA: f32 = ((POINT_RADIUS + 1.) * 0.8) * PEN_SIZE;
 pub static HANDLE_RADIUS: f32 = 2.5 * PEN_SIZE;
 pub static HANDLEBAR_THICKNESS: f32 = 3. * PEN_SIZE;
-pub static ANCHOR_RADIUS: f32 = 15.;
+pub static ANCHOR_RADIUS: f32 = 15. * PEN_SIZE;
 pub static ANCHOR_STROKE_THICKNESS: f32 = 3. * PEN_SIZE;
+pub static POINT_LABEL_PADDING: f32 = 3. * PEN_SIZE;
 
 /* Colors */
 pub static OUTLINE_FILL: u32 = 0xff_666666;
@@ -73,6 +77,3 @@ pub static SELECTED_ANCHOR_COLOR: u32 = 0xff_00ffff;
 
 /* Math */
 pub const DEGREES_IN_RADIANS: f32 = PI / 180.0;
-
-/* Misc. */
-pub const PEN_SIZE: f32 = 1.0;

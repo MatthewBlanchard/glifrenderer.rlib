@@ -370,6 +370,9 @@ pub fn draw_all<PD: GPPointData>(
         }
 
         for (cidx, contour) in layer.outline.iter().enumerate() {
+            if contour.inner[0].ptype == GPPointType::Move {
+                i += 1;
+            }
             for (pidx, point) in contour.inner.iter().enumerate() {
                 if point.b != GPHandle::Colocated {
                     i += 1;

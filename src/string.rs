@@ -184,7 +184,7 @@ impl UiString<'_> {
         let mut paint = Paint::default();
         paint.set_color(self.color);
         paint.set_anti_alias(true);
-        let size = if self.autosized == AutoSizeMode::Full {
+        let size = if self.autosized == AutoSizeMode::None {
             self.size * factor
         } else if self.autosized == AutoSizeMode::OnlySmaller {
             if factor > 1. {
@@ -193,7 +193,7 @@ impl UiString<'_> {
                 self.size
             }
         } else {
-            // AutoSizeMode::None
+            // AutoSizeMode::Full
             self.size
         };
 
@@ -224,15 +224,17 @@ impl UiString<'_> {
         };
         at.x -= padding;
 
-        match self.vcenter {
+        let (padding, height) = match self.vcenter {
             VerticalAlignment::Top => {
                 at.y += padding + line_spacing;
+                ((padding, padding), rect.height())
             }
             VerticalAlignment::Bottom => {
                 at.y -= padding;
                 at.y -= metrics.descent + metrics.leading;
+                ((padding, -padding), -rect.height())
             }
-        }
+        };
 
         let center = match self.centered {
             Alignment::Left => 0.,
@@ -247,8 +249,8 @@ impl UiString<'_> {
             let mut path = Path::new();
             let at_rect = Rect::from_point_and_size(
                 (at.x + center, at.y),
-                (rect.width() + padding, rect.height()),
-            );
+                (rect.width(), height),
+            ).with_outset(padding);
             path.add_rect(at_rect, None);
             path.close();
             canvas.draw_path(&path, &paint2);
