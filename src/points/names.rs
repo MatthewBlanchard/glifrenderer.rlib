@@ -16,7 +16,7 @@ pub fn draw_point_location(
     original: (f32, f32),
     canvas: &mut Canvas,
 ) {
-    let converted = format!("{}, {}", original.0, original.1);
+    let converted = format!("{}, {}", original.0 as i32, original.1 as i32);
     let uis = UiString::new(&converted).padding(POINT_LABEL_PADDING);
     uis.draw(viewport, at, canvas);
 }
