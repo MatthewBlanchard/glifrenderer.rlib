@@ -1,8 +1,6 @@
 use super::constants::*;
-use super::points::calc::*;
 
 use crate::viewport::Viewport;
-use crate::SKIA_POINT_TRANSFORMS;
 use crate::{string::UiString, toggles::PreviewMode};
 
 use glifparser::outline::skia::ToSkiaPaths;
@@ -21,24 +19,16 @@ pub fn draw_components<PD: PointData>(
     paint.set_style(PaintStyle::Stroke);
     let mut path = Path::new();
     for rect in glyph.component_rects.as_ref().unwrap() {
-        let skrect = Rect::new(
-            calc_x(rect.minx),
-            calc_y(rect.miny),
-            calc_x(rect.maxx),
-            calc_y(rect.maxy),
-        );
+        let skrect = Rect::new(rect.minx, rect.miny, rect.maxx, rect.maxy);
         let uis = UiString::with_colors(
             &rect.name,
             COMPONENT_NAME_COLOR,
             Some(COMPONENT_NAME_BGCOLOR),
         );
-        uis.draw(viewport, (calc_x(rect.minx), calc_y(rect.maxy)), canvas);
+        uis.draw(viewport, (rect.minx, rect.maxy), canvas);
         path.add_rect(skrect, None);
     }
-    let skpaths = glyph
-        .flattened
-        .as_ref()
-        .map(|f| f.to_skia_paths(SKIA_POINT_TRANSFORMS));
+    let skpaths = glyph.flattened.as_ref().map(|f| f.to_skia_paths(None));
     skpaths.map(|skp| skp.closed.map(|skpc| canvas.draw_path(&skpc, &paint)));
     canvas.draw_path(&path, &paint);
 }
@@ -133,7 +123,7 @@ pub fn draw<PD: PointData>(canvas: &mut Canvas, glyph: &MFEKGlif<PD>, viewport: 
             };
         }
 
-        let skpaths = layer.outline.to_skia_paths(SKIA_POINT_TRANSFORMS);
+        let skpaths = layer.outline.to_skia_paths(None);
 
         if let Some(op) = &layer.operation {
             let pathop = match op {

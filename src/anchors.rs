@@ -1,5 +1,4 @@
 use super::constants::*;
-use super::points::calc::{calc_x, calc_y};
 use super::string::UiString;
 use crate::viewport::Viewport;
 
@@ -14,7 +13,7 @@ pub fn draw_anchors<PD: PointData>(glyph: &MFEKGlif<PD>, viewport: &Viewport, ca
 
 fn draw_anchor<PD: PointData>(anchor: &Anchor<PD>, viewport: &Viewport, canvas: &mut Canvas) {
     let mut path = SkPath::new();
-    let (x, y) = (calc_x(anchor.x), calc_y(anchor.y));
+    let (x, y) = (anchor.x, anchor.y);
     let radius = ANCHOR_RADIUS * (1. / viewport.factor);
     path.move_to((x - radius, y));
     path.quad_to((x, y), (x, y + radius));

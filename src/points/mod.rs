@@ -6,14 +6,11 @@ use skulpin::skia_safe::{
 };
 use std::collections::HashSet;
 
-pub mod calc;
 pub mod names;
 
-use self::calc::*;
 use super::constants::*;
 use crate::toggles::{HandleStyle, PointLabels};
 use crate::viewport::Viewport;
-use crate::SKIA_POINT_TRANSFORMS;
 
 use glifparser::{
     Handle as GPHandle, MFEKGlif, Point as GPPoint, PointData as GPPointData,
@@ -37,7 +34,7 @@ trait SkiaFromGlyph<PD: GPPointData> {
 
 impl<PD: GPPointData> SkiaFromGlyph<PD> for SkPoint {
     fn from_glif(p: &GPPoint<PD>) -> Self {
-        SkPoint::from((calc_x(p.x), calc_y(p.y)))
+        SkPoint::from((p.x, p.y))
     }
 }
 
@@ -76,19 +73,14 @@ pub fn draw_directions<PD: GPPointData>(
     canvas: &mut Canvas,
 ) {
     for c in &layer.outline {
-        drop(
-            c.inner
-                .to_skia_path(SKIA_POINT_TRANSFORMS)
-                .as_ref()
-                .map(|p| {
-                    let piter = ContourMeasureIter::from_path(p, false, None);
-                    for cm in piter {
-                        // Get vector and tangent -4 Skia units along the contur
-                        let (vec, tan) = cm.pos_tan(-4.).unwrap();
-                        draw_triangle_point(viewport, vec, tan, false, canvas);
-                    }
-                }),
-        );
+        drop(c.inner.to_skia_path(None).as_ref().map(|p| {
+            let piter = ContourMeasureIter::from_path(p, false, None);
+            for cm in piter {
+                // Get vector and tangent -4 Skia units along the contur
+                let (vec, tan) = cm.pos_tan(-4.).unwrap();
+                draw_triangle_point(viewport, vec, tan, false, canvas);
+            }
+        }));
     }
 }
 
@@ -256,7 +248,7 @@ fn draw_handle(viewport: &Viewport, h: GPHandle, selected: bool, canvas: &mut Ca
         GPHandle::At(x, y) => {
             draw_point(
                 viewport,
-                (calc_x(x), calc_y(y)),
+                (x, y),
                 (x, y),
                 None,
                 UIPointType::GPHandle,
@@ -288,16 +280,16 @@ pub fn draw_handlebars<PD: GPPointData>(
 
     match point.a {
         GPHandle::At(x, y) => {
-            path.move_to((calc_x(x), calc_y(y)));
-            path.line_to((calc_x(point.x), calc_y(point.y)));
+            path.move_to((x, y));
+            path.line_to((point.x, point.y));
         }
         _ => {
-            path.move_to((calc_x(point.x), calc_y(point.y)));
+            path.move_to((point.x, point.y));
         }
     }
     match point.b {
         GPHandle::At(x, y) => {
-            path.line_to((calc_x(x), calc_y(y)));
+            path.line_to((x, y));
         }
         _ => {}
     }
@@ -305,7 +297,7 @@ pub fn draw_handlebars<PD: GPPointData>(
         if let Some(pp) = prevpoint {
             match pp.a {
                 GPHandle::At(x, y) => {
-                    path.line_to((calc_x(x), calc_y(y)));
+                    path.line_to((x, y));
                 }
                 _ => {}
             }
@@ -327,7 +319,7 @@ pub fn draw_complete_point<PD: GPPointData>(
 
     draw_point(
         viewport,
-        (calc_x(point.x), calc_y(point.y)),
+        (point.x, point.y),
         (point.x, point.y),
         number,
         UIPointType::Point((point.a, point.b)),

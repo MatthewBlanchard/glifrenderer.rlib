@@ -247,10 +247,8 @@ impl UiString<'_> {
             paint2.set_color(bgcolor);
             paint2.set_anti_alias(true);
             let mut path = Path::new();
-            let at_rect = Rect::from_point_and_size(
-                (at.x + center, at.y),
-                (rect.width(), height),
-            ).with_outset(padding);
+            let at_rect = Rect::from_point_and_size((at.x + center, at.y), (rect.width(), height))
+                .with_outset(padding);
             path.add_rect(at_rect, None);
             path.close();
             canvas.draw_path(&path, &paint2);

@@ -2,7 +2,6 @@ use crate::string::{self, UiString};
 use crate::viewport::Viewport;
 
 use super::constants::*;
-use super::points::calc::*;
 
 use MFEKmath::rect::FlipIfRequired as _;
 
@@ -50,7 +49,7 @@ pub(crate) fn draw_guideline_impl<PD: glifparser::PointData>(
     );
 
     // flo_curves-style line for current guideline
-    let guideline_at = flo::geo::Coord2::from((calc_x(guideline.at.x), calc_y(guideline.at.y)));
+    let guideline_at = flo::geo::Coord2::from((guideline.at.x, guideline.at.y));
     let guideline_ext =
         flo::geo::Coord2::from((guideline_at.0 + angle_vec.x, guideline_at.1 + angle_vec.y));
     let guideline_as_line = (guideline_at, guideline_ext);
@@ -89,7 +88,7 @@ pub(crate) fn draw_guideline_impl<PD: glifparser::PointData>(
         )
     } else {
         // when it's not
-        return
+        return;
     };
 
     path.move_to(((at2.x), (at2.y)));
