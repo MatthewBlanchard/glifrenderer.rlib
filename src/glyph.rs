@@ -29,8 +29,11 @@ pub fn draw_components<PD: PointData>(
         path.add_rect(skrect, None);
     }
     let skpaths = glyph.flattened.as_ref().map(|f| f.to_skia_paths(None));
-    skpaths.map(|skp| skp.closed.map(|skpc| canvas.draw_path(&skpc, &paint)));
-    canvas.draw_path(&path, &paint);
+    if let Some(skp) = skpaths.map(|skp| skp.combined()) {
+        canvas.draw_path(&skp, &paint);
+    } else {
+        log::error!("Failed to draw components!");
+    }
 }
 
 pub fn draw_layer_group(

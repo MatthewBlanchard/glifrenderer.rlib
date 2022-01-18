@@ -30,7 +30,8 @@ fn draw_anchor<PD: PointData>(anchor: &Anchor<PD>, viewport: &Viewport, canvas: 
     paint.set_color(ANCHOR_STROKE);
     paint.set_stroke_width(ANCHOR_STROKE_THICKNESS * (1. / viewport.factor));
     canvas.draw_path(&path, &paint);
-    let uis =
-        UiString::centered_with_colors(&anchor.class, ANCHOR_NAME_COLOR, Some(ANCHOR_NAME_BGCOLOR));
-    uis.draw(viewport, (x, y - (radius * 1.3)), canvas);
+    if let Some(class) = &anchor.class {
+        let uis = UiString::centered_with_colors(class, ANCHOR_NAME_COLOR, Some(ANCHOR_NAME_BGCOLOR));
+        uis.draw(viewport, (x, y - (radius * 1.3)), canvas);
+    }
 }
