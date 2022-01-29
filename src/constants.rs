@@ -40,11 +40,23 @@ pub static HANDLE_STROKE: u32 = 0xff_b928ec;
 pub static HANDLEBAR_STROKE: u32 = 0xff_7e28ec;
 pub static RIB_STROKE: u32 = 0xaa_ff7e7e;
 
+// Can be reused below at your option.
 pub static SELECTED_FILL: u32 = 0xff_ffed50;
 pub static SELECTED_STROKE: u32 = 0xff_ffa115;
 pub static SELECTED_TERTIARY: u32 = 0xff_e6830f;
-pub static SELECTED_OFFCURVE: u32 = 0xff_e6e6e6;
-pub static SELECTED_OFFCURVE_STROKE: u32 = 0xff_ffc829;
+
+pub static SELECTED_POINT_SQUARE_FILL: u32 = SELECTED_FILL;
+pub static SELECTED_POINT_SQUARE_STROKE: u32 = SELECTED_TERTIARY;
+pub static SELECTED_DIRECTION_FILL: u32 = SELECTED_FILL;
+pub static SELECTED_DIRECTION_STROKE: u32 = SELECTED_TERTIARY;
+// One and two refers to number of Bezier handles.
+pub static SELECTED_POINT_ONE_FILL: u32 = SELECTED_FILL;
+pub static SELECTED_POINT_ONE_STROKE: u32 = SELECTED_STROKE;
+pub static SELECTED_POINT_TWO_FILL: u32 = SELECTED_STROKE;
+pub static SELECTED_POINT_TWO_STROKE: u32 = SELECTED_TERTIARY;
+pub static SELECTED_HANDLE_FILL: u32 = 0xff_e6e6e6;
+pub static SELECTED_HANDLE_STROKE: u32 = 0xff_ffc829;
+pub static SELECTED_HANDLEBAR_STROKE: u32 = SELECTED_HANDLE_STROKE;
 
 pub static MEASURE_STROKE: u32 = 0xff_ff5050;
 

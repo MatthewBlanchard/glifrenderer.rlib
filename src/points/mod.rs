@@ -23,8 +23,6 @@ type Color = u32;
 pub enum UIPointType {
     Point((GPHandle, GPHandle)),
     GPHandle,
-    #[allow(unused)]
-    Anchor,
     Direction,
 }
 
@@ -41,14 +39,16 @@ impl<PD: GPPointData> SkiaFromGlyph<PD> for SkPoint {
 fn get_fill_and_stroke(kind: UIPointType, selected: bool) -> (Color, Color) {
     let (fill, stroke) = if selected {
         match kind {
-            UIPointType::GPHandle => (SELECTED_OFFCURVE, SELECTED_OFFCURVE_STROKE),
+            UIPointType::GPHandle => (SELECTED_HANDLE_FILL, SELECTED_HANDLE_STROKE),
             UIPointType::Point((GPHandle::At(_, _), GPHandle::Colocated))
             | UIPointType::Point((GPHandle::Colocated, GPHandle::At(_, _))) => {
-                (SELECTED_STROKE, SELECTED_TERTIARY)
+                (SELECTED_POINT_ONE_FILL, SELECTED_POINT_ONE_STROKE)
             }
-            UIPointType::Point((GPHandle::Colocated, GPHandle::Colocated))
-            | UIPointType::Direction => (SELECTED_STROKE, SELECTED_TERTIARY),
-            _ => (SELECTED_FILL, SELECTED_STROKE),
+            UIPointType::Direction => (SELECTED_DIRECTION_FILL, SELECTED_DIRECTION_STROKE),
+            UIPointType::Point((GPHandle::Colocated, GPHandle::Colocated)) => {
+                (SELECTED_POINT_SQUARE_FILL, SELECTED_POINT_SQUARE_STROKE)
+            }
+            _ => (SELECTED_POINT_TWO_FILL, SELECTED_POINT_TWO_STROKE),
         }
     } else {
         match kind {
@@ -153,9 +153,11 @@ pub fn draw_round_point(
     kind: UIPointType,
     selected: bool,
     canvas: &mut Canvas,
-    paint: &mut Paint,
     factor: f32,
 ) {
+    let mut paint = Paint::default();
+    paint.set_stroke_width(DIRECTION_STROKE_THICKNESS * (1. / factor));
+    paint.set_anti_alias(true);
     let (fill, stroke) = get_fill_and_stroke(kind, selected);
     let factor = factor;
     let radius = POINT_RADIUS
@@ -165,6 +167,7 @@ pub fn draw_round_point(
         } else {
             1.
         };
+    paint.set_style(PaintStyle::StrokeAndFill);
     paint.set_color(fill);
     canvas.draw_circle((at.0, at.1), radius, &paint);
     paint.set_style(PaintStyle::Stroke);
@@ -177,9 +180,11 @@ pub fn draw_square_point(
     kind: UIPointType,
     selected: bool,
     canvas: &mut Canvas,
-    paint: &mut Paint,
     factor: f32,
 ) {
+    let mut paint = Paint::default();
+    paint.set_stroke_width(DIRECTION_STROKE_THICKNESS * (1. / factor));
+    paint.set_anti_alias(true);
     let (fill, stroke) = get_fill_and_stroke(kind, selected);
     let radius = (POINT_RADIUS * (1. / factor)) * 2. * if selected { 1.75 } else { 1. };
 
@@ -223,10 +228,10 @@ pub fn draw_point<PD: GPPointData>(
 
     match kind {
         UIPointType::GPHandle | UIPointType::Point((GPHandle::At(_, _), GPHandle::At(_, _))) => {
-            draw_round_point(at, kind, selected, canvas, &mut paint, viewport.factor);
+            draw_round_point(at, kind, selected, canvas, viewport.factor);
         }
         UIPointType::Point(_) => {
-            draw_square_point(at, kind, selected, canvas, &mut paint, viewport.factor);
+            draw_square_point(at, kind, selected, canvas, viewport.factor);
         }
         _ => {}
     }
@@ -284,7 +289,7 @@ pub fn draw_handlebars<PD: GPPointData>(
 
     paint.set_anti_alias(true);
     paint.set_color(if selected {
-        SELECTED_FILL
+        SELECTED_HANDLEBAR_STROKE
     } else {
         HANDLEBAR_STROKE
     });
