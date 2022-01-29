@@ -240,7 +240,7 @@ impl UiString<'_> {
                 vpadding = -vpadding;
                 vpadding *= 1.5;
                 height = metrics.descent;
-            },
+            }
             VerticalAlignment::Top => {
                 height = -height;
             }
@@ -265,8 +265,11 @@ impl UiString<'_> {
             paint2.set_color(bgcolor);
             paint2.set_anti_alias(true);
             let mut path = Path::new();
-            let at_rect = Rect::from_point_and_size((at.x + center, at.y + metrics.descent), (rect.width(), -line_spacing))
-                .with_outset((hpadding * 1.5, vpadding));
+            let at_rect = Rect::from_point_and_size(
+                (at.x + center, at.y + metrics.descent),
+                (rect.width(), -line_spacing),
+            )
+            .with_outset((hpadding * 1.5, vpadding));
             path.add_rect(at_rect, None);
             path.close();
             canvas.draw_path(&path, &paint2);
