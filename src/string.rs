@@ -11,12 +11,14 @@ use super::constants::*;
 
 pub static POINTFONTSIZE: f32 = 14.0;
 
+#[derive(Copy, Clone, PartialEq, Eq)]
 pub enum Alignment {
     Left,
     Right,
     Center,
 }
 
+#[derive(Copy, Clone)]
 pub struct UiString<'a> {
     pub string: &'a str,
     pub color: u32,
@@ -30,14 +32,14 @@ pub struct UiString<'a> {
     pub rotation: Option<f32>,
 }
 
-#[derive(PartialEq, Eq)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 pub enum AutoSizeMode {
     Full,
     OnlySmaller,
     None,
 }
 
-#[derive(PartialEq, Eq)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 pub enum VerticalAlignment {
     Top,
     Bottom,
