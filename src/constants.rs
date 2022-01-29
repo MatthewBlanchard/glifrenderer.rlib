@@ -78,6 +78,8 @@ pub static PAPER_FILL: u32 = 0xff_000000;
 pub static ANCHOR_FILL: u32 = 0xff_0000ff;
 pub static ANCHOR_STROKE: u32 = 0xff_000099;
 
+pub static POINT_NAME_DARKEN: u8 = 0x02;
+
 // On-screen strings
 pub static COMPONENT_NAME_COLOR: u32 = 0xff_444444;
 pub static COMPONENT_NAME_BGCOLOR: u32 = 0x00_ffffff;

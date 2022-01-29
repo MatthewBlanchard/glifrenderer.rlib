@@ -236,9 +236,6 @@ pub fn draw_point<PD: GPPointData>(
         _ => {}
     }
 
-    if let Some(name) = point.name.as_ref() {
-        names::draw_point_str(viewport, at, name, canvas);
-    }
     match number {
         None => {}
         Some(i) => match viewport.point_labels {
@@ -246,6 +243,11 @@ pub fn draw_point<PD: GPPointData>(
             PointLabels::Numbered => names::draw_point_number(viewport, at, i, canvas),
             PointLabels::Locations => names::draw_point_location(viewport, at, original, canvas),
         },
+    }
+
+    if let Some(name) = point.name.as_ref() {
+        let (_fill, stroke) = get_fill_and_stroke(kind, selected);
+        names::draw_point_name(viewport, at, stroke, name, canvas);
     }
 
     if let UIPointType::Point((a, b)) = kind {
