@@ -336,9 +336,11 @@ pub fn draw_all<PD: GPPointData>(
     vpidx: Option<usize>,
     selected: &HashSet<(usize, usize)>,
     canvas: &mut Canvas,
+    only_selected: bool,
 ) {
     let mut i: isize = -1;
     let handle_style = viewport.handle_style;
+    let should_draw = |draw: bool| !only_selected || (only_selected && draw);
 
     for (lidx, layer) in glyph.layers.iter().enumerate() {
         if lidx != active_layer {
@@ -355,7 +357,9 @@ pub fn draw_all<PD: GPPointData>(
                     } else {
                         false
                     };
-                    draw_handlebars(viewport, Some(prevpoint), &point, selected, canvas);
+                    if should_draw(selected) {
+                        draw_handlebars(viewport, Some(prevpoint), &point, selected, canvas);
+                    }
                     prevpoint = &point;
                 }
             }
@@ -377,7 +381,9 @@ pub fn draw_all<PD: GPPointData>(
                     false
                 };
 
-                draw_complete_point(viewport, &point, Some(i), selected, canvas);
+                if should_draw(selected) {
+                    draw_complete_point(viewport, &point, Some(i), selected, canvas);
+                }
                 if point.a != GPHandle::Colocated {
                     i += 1;
                 }
