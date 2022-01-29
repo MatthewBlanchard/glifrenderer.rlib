@@ -26,6 +26,8 @@ pub struct UiString<'a> {
     pub size: f32,
     pub padding: Option<f32>,
     pub autosized: AutoSizeMode,
+    /// in degrees
+    pub rotation: Option<f32>,
 }
 
 #[derive(PartialEq, Eq)]
@@ -41,7 +43,6 @@ pub enum VerticalAlignment {
     Bottom,
 }
 
-#[allow(dead_code)]
 impl<'a> UiString<'a> {
     pub fn new(s: &'a str) -> Self {
         Self {
@@ -53,6 +54,7 @@ impl<'a> UiString<'a> {
             vcenter: VerticalAlignment::Bottom,
             padding: None,
             autosized: AutoSizeMode::Full,
+            rotation: None,
         }
     }
 
@@ -92,6 +94,11 @@ impl<'a> UiString<'a> {
 
     pub fn autosized(mut self, autosized: AutoSizeMode) -> Self {
         self.autosized = autosized;
+        self
+    }
+
+    pub fn rotated(mut self, rotation: f32) -> Self {
+        self.rotation = Some(rotation);
         self
     }
 }
@@ -241,6 +248,10 @@ impl UiString<'_> {
             Alignment::Right => (rect.width()),
             Alignment::Center => (rect.width() / 2.),
         };
+
+        if let Some(angle) = self.rotation {
+            canvas.rotate(-angle, Some(at.into()));
+        }
 
         if let Some(bgcolor) = self.bgcolor {
             let mut paint2 = Paint::default();
