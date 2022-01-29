@@ -196,15 +196,16 @@ pub fn draw_square_point(
     canvas.draw_path(&path, &paint);
 }
 
-pub fn draw_point(
+pub fn draw_point<PD: GPPointData>(
     viewport: &Viewport,
-    at: (f32, f32),
-    original: (f32, f32),
+    point: &GPPoint<PD>,
     number: Option<isize>,
     kind: UIPointType,
     selected: bool,
     canvas: &mut Canvas,
 ) {
+    let at = (point.x, point.y);
+    let original = at;
     let mut paint = Paint::default();
     paint.set_anti_alias(true);
     paint.set_style(PaintStyle::StrokeAndFill);
@@ -230,6 +231,9 @@ pub fn draw_point(
         _ => {}
     }
 
+    if let Some(name) = point.name.as_ref() {
+        names::draw_point_str(viewport, at, name, canvas);
+    }
     match number {
         None => {}
         Some(i) => match viewport.point_labels {
@@ -241,20 +245,24 @@ pub fn draw_point(
 
     if let UIPointType::Point((a, b)) = kind {
         if viewport.handle_style != HandleStyle::None {
-            draw_handle(viewport, a, selected, canvas);
-            draw_handle(viewport, b, selected, canvas);
+            draw_handle::<PD>(viewport, a, selected, canvas);
+            draw_handle::<PD>(viewport, b, selected, canvas);
         }
     }
 }
 
-fn draw_handle(viewport: &Viewport, h: GPHandle, selected: bool, canvas: &mut Canvas) {
+fn draw_handle<PD: GPPointData>(
+    viewport: &Viewport,
+    h: GPHandle,
+    selected: bool,
+    canvas: &mut Canvas,
+) {
     match h {
         GPHandle::Colocated => {}
         GPHandle::At(x, y) => {
-            draw_point(
+            draw_point::<PD>(
                 viewport,
-                (x, y),
-                (x, y),
+                &GPPoint::from_x_y_type((x, y), GPPointType::OffCurve),
                 None,
                 UIPointType::GPHandle,
                 selected,
@@ -324,8 +332,7 @@ pub fn draw_complete_point<PD: GPPointData>(
 
     draw_point(
         viewport,
-        (point.x, point.y),
-        (point.x, point.y),
+        point,
         number,
         UIPointType::Point((point.a, point.b)),
         selected,
