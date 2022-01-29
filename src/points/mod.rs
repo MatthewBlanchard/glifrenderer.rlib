@@ -81,7 +81,7 @@ pub fn draw_directions<PD: GPPointData>(
             for cm in piter {
                 // Get vector and tangent -4 Skia units along the contur
                 let (vec, tan) = cm.pos_tan(-4.).unwrap();
-                if only_selected && selected.contains(&ci) {
+                if !only_selected || (only_selected && selected.contains(&ci)) {
                     draw_triangle_point(viewport, vec, tan, false, canvas);
                 }
             }
