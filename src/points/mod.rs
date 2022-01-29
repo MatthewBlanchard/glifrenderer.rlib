@@ -71,14 +71,19 @@ pub fn draw_directions<PD: GPPointData>(
     viewport: &Viewport,
     layer: &Layer<PD>,
     canvas: &mut Canvas,
+    selected: &HashSet<(usize, usize)>,
+    only_selected: bool,
 ) {
-    for c in &layer.outline {
+    let selected: HashSet<usize> = selected.into_iter().map(|(ci, _pi)| *ci).collect();
+    for (ci, c) in layer.outline.iter().enumerate() {
         drop(c.inner.to_skia_path(None).as_ref().map(|p| {
             let piter = ContourMeasureIter::from_path(p, false, None);
             for cm in piter {
                 // Get vector and tangent -4 Skia units along the contur
                 let (vec, tan) = cm.pos_tan(-4.).unwrap();
-                draw_triangle_point(viewport, vec, tan, false, canvas);
+                if only_selected && selected.contains(&ci) {
+                    draw_triangle_point(viewport, vec, tan, false, canvas);
+                }
             }
         }));
     }
