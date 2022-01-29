@@ -186,7 +186,7 @@ impl UiString<'_> {
 impl UiString<'_> {
     pub fn draw(&self, viewport: &Viewport, at: (f32, f32), canvas: &mut Canvas) {
         let matrix = canvas.local_to_device_as_3x3();
-        let mut at = matrix.map_point(at);
+        let at = matrix.map_point(at);
         canvas.save();
         canvas.set_matrix(&M44::new_identity());
         let factor = viewport.factor;
@@ -231,20 +231,20 @@ impl UiString<'_> {
         } else {
             0.
         };
-        at.x -= padding;
 
-        let (padding, height) = match self.vcenter {
-            VerticalAlignment::Top => {
-                at.y += padding + line_spacing;
-                ((padding, padding), rect.height())
-            }
+        let mut height = line_spacing;
+        let (hpadding, mut vpadding) = (padding, padding);
+        vpadding += metrics.leading;
+        match self.vcenter {
             VerticalAlignment::Bottom => {
-                at.y -= padding;
-                at.y -= metrics.descent + metrics.leading;
-                ((padding, -padding), -rect.height())
+                vpadding = -vpadding;
+                vpadding *= 1.5;
+                height = metrics.descent;
+            },
+            VerticalAlignment::Top => {
+                height = -height;
             }
-        };
-
+        }
         let center = match self.centered {
             Alignment::Left => 0.,
             Alignment::Right => (rect.width()),
@@ -254,20 +254,24 @@ impl UiString<'_> {
         if let Some(angle) = self.rotation {
             canvas.rotate(-angle, Some(at.into()));
         }
+        canvas.translate((-center, -height));
+        canvas.translate((hpadding, vpadding));
+        if self.vcenter == VerticalAlignment::Bottom {
+            vpadding = vpadding * (2. / 3.);
+        }
 
         if let Some(bgcolor) = self.bgcolor {
             let mut paint2 = Paint::default();
             paint2.set_color(bgcolor);
             paint2.set_anti_alias(true);
             let mut path = Path::new();
-            let at_rect = Rect::from_point_and_size((at.x + center, at.y), (rect.width(), height))
-                .with_outset(padding);
+            let at_rect = Rect::from_point_and_size((at.x + center, at.y + metrics.descent), (rect.width(), -line_spacing))
+                .with_outset((hpadding * 1.5, vpadding));
             path.add_rect(at_rect, None);
             path.close();
             canvas.draw_path(&path, &paint2);
         }
 
-        at.x -= center;
         canvas.draw_text_blob(&blob, at, &paint);
         canvas.restore();
     }
