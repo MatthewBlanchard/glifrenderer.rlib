@@ -1,4 +1,6 @@
 use glifparser::glif::Layer;
+use glifparser::glif::contour::MFEKContourCommon;
+use glifparser::glif::point::MFEKPointCommon;
 use glifparser::outline::skia::ToSkiaPath;
 use skulpin::skia_safe::{
     Canvas, ContourMeasureIter, Matrix, Paint, PaintStyle, Path as SkPath, Point as SkPoint,
@@ -13,8 +15,7 @@ use crate::toggles::{HandleStyle, PointLabels};
 use crate::viewport::Viewport;
 
 use glifparser::{
-    Handle as GPHandle, MFEKGlif, Point as GPPoint, PointData as GPPointData,
-    PointType as GPPointType,
+    Handle as GPHandle, MFEKGlif, Point as GPPoint, PointData as GPPointData, WhichHandle,
 };
 
 type Color = u32;
@@ -36,36 +37,6 @@ impl<PD: GPPointData> SkiaFromGlyph<PD> for SkPoint {
     }
 }
 
-fn get_fill_and_stroke(kind: UIPointType, selected: bool) -> (Color, Color) {
-    let (fill, stroke) = if selected {
-        match kind {
-            UIPointType::GPHandle => (SELECTED_HANDLE_FILL, SELECTED_HANDLE_STROKE),
-            UIPointType::Point((GPHandle::At(_, _), GPHandle::Colocated))
-            | UIPointType::Point((GPHandle::Colocated, GPHandle::At(_, _))) => {
-                (SELECTED_POINT_ONE_FILL, SELECTED_POINT_ONE_STROKE)
-            }
-            UIPointType::Direction => (SELECTED_DIRECTION_FILL, SELECTED_DIRECTION_STROKE),
-            UIPointType::Point((GPHandle::Colocated, GPHandle::Colocated)) => {
-                (SELECTED_POINT_SQUARE_FILL, SELECTED_POINT_SQUARE_STROKE)
-            }
-            _ => (SELECTED_POINT_TWO_FILL, SELECTED_POINT_TWO_STROKE),
-        }
-    } else {
-        match kind {
-            UIPointType::GPHandle => (HANDLE_FILL, HANDLE_STROKE),
-            UIPointType::Point((GPHandle::At(_, _), GPHandle::Colocated))
-            | UIPointType::Point((GPHandle::Colocated, GPHandle::At(_, _))) => {
-                (POINT_ONE_FILL, POINT_ONE_STROKE)
-            }
-            UIPointType::Direction => (DIRECTION_FILL, DIRECTION_STROKE),
-            UIPointType::Point((GPHandle::Colocated, GPHandle::Colocated)) => {
-                (POINT_SQUARE_FILL, POINT_SQUARE_STROKE)
-            }
-            _ => (POINT_TWO_FILL, POINT_TWO_STROKE),
-        }
-    };
-    (fill, stroke)
-}
 
 pub fn draw_directions<PD: GPPointData>(
     viewport: &Viewport,
@@ -76,7 +47,7 @@ pub fn draw_directions<PD: GPPointData>(
 ) {
     let selected: HashSet<usize> = selected.into_iter().map(|(ci, _pi)| *ci).collect();
     for (ci, c) in layer.outline.iter().enumerate() {
-        drop(c.inner.to_skia_path(None).as_ref().map(|p| {
+        drop(c.inner.cubic().unwrap().to_skia_path(None).as_ref().map(|p| {
             let piter = ContourMeasureIter::from_path(p, false, None);
             for cm in piter {
                 // Get vector and tangent -4 Skia units along the contur
@@ -150,23 +121,16 @@ fn draw_triangle_point(
 
 pub fn draw_round_point(
     at: (f32, f32),
-    kind: UIPointType,
-    selected: bool,
+    radius: f32,
+    stroke: Color,
+    fill: Color,
     canvas: &mut Canvas,
     factor: f32,
 ) {
     let mut paint = Paint::default();
     paint.set_stroke_width(DIRECTION_STROKE_THICKNESS * (1. / factor));
     paint.set_anti_alias(true);
-    let (fill, stroke) = get_fill_and_stroke(kind, selected);
-    let factor = factor;
-    let radius = POINT_RADIUS
-        * (1. / factor)
-        * if kind != UIPointType::GPHandle && selected {
-            1.75
-        } else {
-            1.
-        };
+        
     paint.set_style(PaintStyle::StrokeAndFill);
     paint.set_color(fill);
     canvas.draw_circle((at.0, at.1), radius, &paint);
@@ -177,16 +141,15 @@ pub fn draw_round_point(
 
 pub fn draw_square_point(
     at: (f32, f32),
-    kind: UIPointType,
-    selected: bool,
+    radius: f32,
+    stroke: Color,
+    fill: Color,
     canvas: &mut Canvas,
     factor: f32,
 ) {
     let mut paint = Paint::default();
     paint.set_stroke_width(DIRECTION_STROKE_THICKNESS * (1. / factor));
     paint.set_anti_alias(true);
-    let (fill, stroke) = get_fill_and_stroke(kind, selected);
-    let radius = (POINT_RADIUS * (1. / factor)) * 2. * if selected { 1.75 } else { 1. };
 
     let mut path = SkPath::new();
     paint.set_color(fill);
@@ -201,39 +164,73 @@ pub fn draw_square_point(
     canvas.draw_path(&path, &paint);
 }
 
+
+fn get_fill_and_stroke(kind: UIPointType, selected: bool) -> (Color, Color) {
+    let (fill, stroke) = if selected {
+        match kind {
+            UIPointType::GPHandle => (SELECTED_HANDLE_FILL, SELECTED_HANDLE_STROKE),
+            UIPointType::Point((GPHandle::At(_, _), GPHandle::Colocated))
+            | UIPointType::Point((GPHandle::Colocated, GPHandle::At(_, _))) => {
+                (SELECTED_POINT_ONE_FILL, SELECTED_POINT_ONE_STROKE)
+            }
+            UIPointType::Direction => (SELECTED_DIRECTION_FILL, SELECTED_DIRECTION_STROKE),
+            UIPointType::Point((GPHandle::Colocated, GPHandle::Colocated)) => {
+                (SELECTED_POINT_SQUARE_FILL, SELECTED_POINT_SQUARE_STROKE)
+            }
+            _ => (SELECTED_POINT_TWO_FILL, SELECTED_POINT_TWO_STROKE),
+        }
+    } else {
+        match kind {
+            UIPointType::GPHandle => (HANDLE_FILL, HANDLE_STROKE),
+            UIPointType::Point((GPHandle::At(_, _), GPHandle::Colocated))
+            | UIPointType::Point((GPHandle::Colocated, GPHandle::At(_, _))) => {
+                (POINT_ONE_FILL, POINT_ONE_STROKE)
+            }
+            UIPointType::Direction => (DIRECTION_FILL, DIRECTION_STROKE),
+            UIPointType::Point((GPHandle::Colocated, GPHandle::Colocated)) => {
+                (POINT_SQUARE_FILL, POINT_SQUARE_STROKE)
+            }
+            _ => (POINT_TWO_FILL, POINT_TWO_STROKE),
+        }
+    };
+    (fill, stroke)
+}
+
+pub fn get_point_stroke_fill(round: bool, selected: bool) -> (Color, Color) {
+    match round {
+        true => match selected {
+            true => (SELECTED_POINT_ONE_FILL, SELECTED_POINT_ONE_STROKE),
+            false => (POINT_ONE_FILL, POINT_ONE_STROKE)
+        },
+        false => match selected {
+            true => (SELECTED_POINT_SQUARE_FILL, SELECTED_POINT_SQUARE_STROKE),
+            false => (POINT_SQUARE_FILL, POINT_SQUARE_STROKE),
+        },
+    }
+}
 pub fn draw_point<PD: GPPointData>(
     viewport: &Viewport,
-    point: &GPPoint<PD>,
+    point: &dyn MFEKPointCommon<PD>,
     number: Option<isize>,
-    kind: UIPointType,
     selected: bool,
     canvas: &mut Canvas,
 ) {
-    let at = (point.x, point.y);
+    let factor = viewport.factor;
+    let at = (point.x(), point.y());
     let original = at;
     let mut paint = Paint::default();
     paint.set_anti_alias(true);
     paint.set_style(PaintStyle::StrokeAndFill);
-    let thiccness = if kind == UIPointType::GPHandle {
-        HANDLE_STROKE_THICKNESS
-    } else {
-        POINT_STROKE_THICKNESS
-    };
-    paint.set_stroke_width(thiccness * (1. / viewport.factor));
-    let _radius = if kind == UIPointType::GPHandle {
-        HANDLE_RADIUS
-    } else {
-        POINT_RADIUS
-    } * (1. / viewport.factor);
+    let thiccness = POINT_STROKE_THICKNESS;
+    paint.set_stroke_width(thiccness * (1. / factor));
+    let radius = POINT_RADIUS * (1. / factor) * 1.75;
 
-    match kind {
-        UIPointType::GPHandle | UIPointType::Point((GPHandle::At(_, _), GPHandle::At(_, _))) => {
-            draw_round_point(at, kind, selected, canvas, viewport.factor);
-        }
-        UIPointType::Point(_) => {
-            draw_square_point(at, kind, selected, canvas, viewport.factor);
-        }
-        _ => {}
+    let round = point.get_handle_position(WhichHandle::A).is_some() && point.get_handle_position(WhichHandle::B).is_some();
+    let (stroke, fill) = get_point_stroke_fill(round, selected);
+    if round {
+        draw_round_point(at, radius, fill, stroke, canvas, factor);
+    } else {
+        draw_square_point(at, radius * 1.25, fill, stroke, canvas, factor);
     }
 
     match number {
@@ -245,44 +242,48 @@ pub fn draw_point<PD: GPPointData>(
         },
     }
 
-    if let Some(name) = point.name.as_ref() {
-        let (_fill, stroke) = get_fill_and_stroke(kind, selected);
+    if let Some(name) = point.get_name().as_ref() {
         names::draw_point_name(viewport, at, stroke, name, canvas);
     }
 
-    if let UIPointType::Point((a, b)) = kind {
-        if viewport.handle_style != HandleStyle::None {
+    if viewport.handle_style != HandleStyle::None {
+        if let Some(a) = point.get_handle(WhichHandle::A) {
             draw_handle::<PD>(viewport, a, selected, canvas);
+        }
+        if let Some(b) = point.get_handle(WhichHandle::B) {
             draw_handle::<PD>(viewport, b, selected, canvas);
         }
     }
 }
 
+pub fn get_handle_stroke_fill(selected: bool) -> (Color, Color) {
+    match selected {
+        true => (SELECTED_HANDLE_FILL, SELECTED_HANDLE_STROKE),
+        false => (HANDLE_FILL, HANDLE_STROKE),
+    }
+}
 fn draw_handle<PD: GPPointData>(
     viewport: &Viewport,
     h: GPHandle,
     selected: bool,
     canvas: &mut Canvas,
 ) {
-    match h {
-        GPHandle::Colocated => {}
-        GPHandle::At(x, y) => {
-            draw_point::<PD>(
-                viewport,
-                &GPPoint::from_x_y_type((x, y), GPPointType::OffCurve),
-                None,
-                UIPointType::GPHandle,
-                selected,
-                canvas,
-            );
-        }
+    // if the handle is colocated there is nothing to draw
+    if let GPHandle::At(x, y) = h {
+        let at = (x, y);
+        let mut paint = Paint::default();
+        paint.set_anti_alias(true);
+        paint.set_style(PaintStyle::StrokeAndFill);
+        paint.set_stroke_width(HANDLE_STROKE_THICKNESS * (1. / viewport.factor));
+        let radius = POINT_RADIUS * (1. / viewport.factor);
+        let (fill, stroke) = get_handle_stroke_fill(selected);
+        draw_round_point(at, radius, stroke, fill, canvas, viewport.factor);
     }
 }
 
 pub fn draw_handlebars<PD: GPPointData>(
     viewport: &Viewport,
-    prevpoint: Option<&GPPoint<PD>>, // None in cubic mode when selecting as no access to prevpoints
-    point: &GPPoint<PD>,
+    point: &dyn MFEKPointCommon<PD>,
     selected: bool,
     canvas: &mut Canvas,
 ) {
@@ -298,50 +299,31 @@ pub fn draw_handlebars<PD: GPPointData>(
     paint.set_stroke_width(HANDLEBAR_THICKNESS * (1. / viewport.factor));
     paint.set_style(PaintStyle::Stroke);
 
-    match point.a {
-        GPHandle::At(x, y) => {
-            path.move_to((x, y));
-            path.line_to((point.x, point.y));
-        }
-        _ => {
-            path.move_to((point.x, point.y));
-        }
+    if let Some((x, y)) = point.get_handle_position(WhichHandle::A) {
+        path.move_to((x, y));
+        path.line_to((point.x(), point.y()));
+    } else {
+        path.move_to((point.x(), point.y()));
     }
-    match point.b {
-        GPHandle::At(x, y) => {
-            path.line_to((x, y));
-        }
-        _ => {}
+
+    if let Some((x, y)) = point.get_handle_position(WhichHandle::B) {
+        path.line_to((x, y));
     }
-    if point.ptype == GPPointType::QCurve || point.ptype == GPPointType::QClose {
-        if let Some(pp) = prevpoint {
-            match pp.a {
-                GPHandle::At(x, y) => {
-                    path.line_to((x, y));
-                }
-                _ => {}
-            }
-        }
-    }
+
     canvas.draw_path(&path, &paint);
 }
 
 pub fn draw_complete_point<PD: GPPointData>(
     viewport: &Viewport,
-    point: &GPPoint<PD>,
+    point: &dyn MFEKPointCommon<PD>,
     number: Option<isize>,
     selected: bool,
     canvas: &mut Canvas,
 ) {
-    if point.ptype == GPPointType::QClose {
-        return;
-    }
-
     draw_point(
         viewport,
         point,
         number,
-        UIPointType::Point((point.a, point.b)),
         selected,
         canvas,
     );
@@ -367,8 +349,8 @@ pub fn draw_all<PD: GPPointData>(
         };
         if handle_style == HandleStyle::Handlebars {
             for (cidx, contour) in layer.outline.iter().enumerate() {
-                let mut prevpoint = contour.inner.first().unwrap();
-                for (pidx, point) in contour.inner.iter().enumerate() {
+
+                for (pidx, point) in contour.iter().enumerate() {
                     let selected = if (lidx == active_layer && selected.contains(&(cidx, pidx)))
                         || (lidx == active_layer && vcidx == Some(cidx) && vpidx == Some(pidx))
                     {
@@ -377,21 +359,24 @@ pub fn draw_all<PD: GPPointData>(
                         false
                     };
                     if should_draw(selected) {
-                        draw_handlebars(viewport, Some(prevpoint), &point, selected, canvas);
+                        draw_handlebars(viewport, point, selected, canvas);
                     }
-                    prevpoint = &point;
                 }
             }
         }
 
         for (cidx, contour) in layer.outline.iter().enumerate() {
-            if contour.inner[0].ptype == GPPointType::Move {
+            if contour.is_open() {
                 i += 1;
             }
-            for (pidx, point) in contour.inner.iter().enumerate() {
-                if point.b != GPHandle::Colocated {
-                    i += 1;
+
+            for (pidx, point) in contour.iter().enumerate() {
+                if let Some(handle_b) = point.get_handle(WhichHandle::B) {
+                    if handle_b != GPHandle::Colocated {
+                        i += 1;
+                    }
                 }
+
                 let selected = if (lidx == active_layer && selected.contains(&(cidx, pidx)))
                     || (lidx == active_layer && vcidx == Some(cidx) && vpidx == Some(pidx))
                 {
@@ -401,10 +386,13 @@ pub fn draw_all<PD: GPPointData>(
                 };
 
                 if should_draw(selected) {
-                    draw_complete_point(viewport, &point, Some(i), selected, canvas);
+                    draw_complete_point(viewport, point, Some(i), selected, canvas);
                 }
-                if point.a != GPHandle::Colocated {
-                    i += 1;
+
+                if let Some(handle_b) = point.get_handle(WhichHandle::B) {
+                    if handle_b != GPHandle::Colocated {
+                        i += 1;
+                    }
                 }
                 i += 1;
             }

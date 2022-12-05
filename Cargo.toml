@@ -6,10 +6,12 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-glifparser = { git = "https://github.com/MFEK/glifparser.rlib", branch = "master", features=["mfek", "skia"] }
-MFEKmath = { git = "https://github.com/MFEK/math.rlib", branch = "main"}
-#glifparser = { path = "../glifparser.rlib", features=["mfek", "skia"] } # for development
-#MFEKmath = { path = "../math.rlib" } # for development
+#glifparser = { git = "https://github.com/MFEK/glifparser.rlib", branch = "master", features=["mfek", "skia"] }
+glifparser = { path = "../glifparser.rlib", features=["mfek", "skia"] } # for development
+
+#MFEKmath = { git = "https://github.com/MFEK/math.rlib", branch = "main"}
+MFEKmath = { path = "../math.rlib" } # for development
+
 skulpin = { git = "https://github.com/MFEK/skulpin" }
 skulpin-renderer = {git = "https://github.com/MFEK/skulpin/"}
 log = "0.4"
