@@ -247,8 +247,8 @@ impl UiString<'_> {
         }
         let center = match self.centered {
             Alignment::Left => 0.,
-            Alignment::Right => (rect.width()),
-            Alignment::Center => (rect.width() / 2.),
+            Alignment::Right => rect.width(),
+            Alignment::Center => rect.width() / 2.,
         };
 
         if let Some(angle) = self.rotation {

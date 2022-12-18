@@ -10,7 +10,7 @@ edition = "2021"
 glifparser = { path = "../glifparser.rlib", features=["mfek", "skia"] } # for development
 
 #MFEKmath = { git = "https://github.com/MFEK/math.rlib", branch = "main"}
-MFEKmath = { path = "../math.rlib" } # for development
+MFEKmath = { path = "../math.rlib", features=["skia"] } # for development
 
 skulpin = { git = "https://github.com/MFEK/skulpin" }
 skulpin-renderer = {git = "https://github.com/MFEK/skulpin/"}
