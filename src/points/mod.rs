@@ -3,7 +3,7 @@ use glifparser::glif::Layer;
 use glifparser::glif::contour::MFEKContourCommon;
 use glifparser::glif::point::MFEKPointCommon;
 use glifparser::outline::skia::ToSkiaPath;
-use skulpin::skia_safe::{
+use skia_safe::{
     Canvas, ContourMeasureIter, Matrix, Paint, PaintStyle, Path as SkPath, Point as SkPoint,
     Rect as SkRect, Vector,
 };
@@ -124,19 +124,17 @@ pub fn draw_round_point(
     at: (f32, f32),
     radius: f32,
     stroke: Color,
-    fill: Color,
+    alpha: f32,
     canvas: &mut Canvas,
     factor: f32,
 ) {
     let mut paint = Paint::default();
     paint.set_stroke_width(DIRECTION_STROKE_THICKNESS * (1. / factor));
     paint.set_anti_alias(true);
-        
-    paint.set_style(PaintStyle::StrokeAndFill);
-    paint.set_color(fill);
-    canvas.draw_circle((at.0, at.1), radius, &paint);
+
     paint.set_style(PaintStyle::Stroke);
     paint.set_color(stroke);
+    paint.set_alpha_f(1.);
     canvas.draw_circle((at.0, at.1), radius, &paint);
 }
 
@@ -153,13 +151,11 @@ pub fn draw_square_point(
     paint.set_anti_alias(true);
 
     let mut path = SkPath::new();
-    paint.set_color(fill);
     path.add_rect(
         SkRect::from_point_and_size((at.0 - radius / 2., at.1 - radius / 2.), (radius, radius)),
         None,
     );
     path.close();
-    canvas.draw_path(&path, &paint);
     paint.set_color(stroke);
     paint.set_style(PaintStyle::Stroke);
     canvas.draw_path(&path, &paint);
@@ -229,7 +225,7 @@ pub fn draw_point<PD: GPPointData>(
     let round = point.get_handle_position(WhichHandle::A).is_some() && point.get_handle_position(WhichHandle::B).is_some();
     let (stroke, fill) = get_point_stroke_fill(round, selected);
     if round {
-        draw_round_point(at, radius, fill, stroke, canvas, factor);
+        draw_round_point(at, radius, fill, 1., canvas, factor);
     } else {
         draw_square_point(at, radius * 1.25, fill, stroke, canvas, factor);
     }
@@ -278,7 +274,7 @@ fn draw_handle<PD: GPPointData>(
         paint.set_stroke_width(HANDLE_STROKE_THICKNESS * (1. / viewport.factor));
         let radius = POINT_RADIUS * (1. / viewport.factor);
         let (fill, stroke) = get_handle_stroke_fill(selected);
-        draw_round_point(at, radius, stroke, fill, canvas, viewport.factor);
+        draw_round_point(at, radius, stroke, 0.5, canvas, viewport.factor);
     }
 }
 
@@ -300,6 +296,7 @@ pub fn draw_handlebars<PD: GPPointData>(
     paint.set_stroke_width(HANDLEBAR_THICKNESS * (1. / viewport.factor));
     paint.set_style(PaintStyle::Stroke);
 
+    paint.set_alpha_f(0.5);
     if let Some((x, y)) = point.get_handle_position(WhichHandle::A) {
         path.move_to((x, y));
         path.line_to((point.x(), point.y()));

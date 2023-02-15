@@ -1,5 +1,5 @@
 use num_traits::Float;
-use skulpin::skia_safe::{
+use skia_safe::{
     Canvas, Font, FontMetrics, FontStyle, Paint, Path, Rect, TextBlob, Typeface, M44,
 };
 

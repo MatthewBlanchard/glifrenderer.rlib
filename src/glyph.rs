@@ -5,8 +5,7 @@ use crate::{string::UiString, toggles::PreviewMode};
 
 use glifparser::outline::skia::ToSkiaPaths;
 use glifparser::{glif::LayerOperation, MFEKGlif, PointData};
-use skulpin::skia_bindings::SkPath;
-use skulpin::skia_safe::{Canvas, Color4f, Handle, Paint, PaintStyle, Path, PathOp, Rect};
+use skia_safe::{Path, Canvas, Color4f, Handle, Paint, PaintStyle, PathOp, Rect};
 
 pub fn draw_components<PD: PointData>(
     glyph: &MFEKGlif<PD>,
@@ -40,15 +39,17 @@ pub fn draw_layer_group(
     viewport: &Viewport,
     canvas: &mut Canvas,
     root_color: Option<Color4f>,
-    open_path: &Handle<SkPath>,
-    closed_path: &Handle<SkPath>,
-    outline_path: &Handle<SkPath>,
+    open_path: &Path,
+    closed_path: &Path,
+    outline_path: &Path,
 ) {
     let mut paint = Paint::default();
     paint.set_anti_alias(true);
 
     if viewport.preview_mode == PreviewMode::Paper {
         paint.set_style(PaintStyle::Fill);
+    } else if viewport.preview_mode == PreviewMode::None {
+        paint.set_style(PaintStyle::Stroke);
     } else {
         paint.set_style(PaintStyle::StrokeAndFill);
         paint.set_color(OUTLINE_FILL);
@@ -140,7 +141,7 @@ pub fn draw<PD: PointData>(canvas: &mut Canvas, glyph: &MFEKGlif<PD>, viewport: 
                 total_open_path.add_path(
                     &open,
                     (0., 0.),
-                    skulpin::skia_safe::path::AddPathMode::Append,
+                    skia_safe::path::AddPathMode::Append,
                 );
             }
 
@@ -148,20 +149,20 @@ pub fn draw<PD: PointData>(canvas: &mut Canvas, glyph: &MFEKGlif<PD>, viewport: 
                 total_outline_path.add_path(
                     &closed,
                     (0., 0.),
-                    skulpin::skia_safe::path::AddPathMode::Append,
+                    skia_safe::path::AddPathMode::Append,
                 );
                 if let Some(result) = total_closed_path.op(&closed, pathop) {
                     total_closed_path = Path::new();
                     total_closed_path.add_path(
                         &result.as_winding().unwrap(),
                         (0., 0.),
-                        skulpin::skia_safe::path::AddPathMode::Append,
+                        skia_safe::path::AddPathMode::Append,
                     );
                 } else {
                     total_closed_path.add_path(
                         &closed,
                         (0., 0.),
-                        skulpin::skia_safe::path::AddPathMode::Append,
+                        skia_safe::path::AddPathMode::Append,
                     );
                 }
             }
@@ -170,7 +171,7 @@ pub fn draw<PD: PointData>(canvas: &mut Canvas, glyph: &MFEKGlif<PD>, viewport: 
                 total_open_path.add_path(
                     &open,
                     (0., 0.),
-                    skulpin::skia_safe::path::AddPathMode::Append,
+                    skia_safe::path::AddPathMode::Append,
                 );
             }
 
@@ -178,12 +179,12 @@ pub fn draw<PD: PointData>(canvas: &mut Canvas, glyph: &MFEKGlif<PD>, viewport: 
                 total_outline_path.add_path(
                     &closed,
                     (0., 0.),
-                    skulpin::skia_safe::path::AddPathMode::Append,
+                    skia_safe::path::AddPathMode::Append,
                 );
                 total_closed_path.add_path(
                     &closed,
                     (0., 0.),
-                    skulpin::skia_safe::path::AddPathMode::Append,
+                    skia_safe::path::AddPathMode::Append,
                 );
             }
         }

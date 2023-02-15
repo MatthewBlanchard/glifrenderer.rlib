@@ -1,4 +1,4 @@
-use skulpin::skia_safe::Canvas;
+use skia_safe::Canvas;
 
 use crate::constants::*;
 use crate::string::{UiString, AutoSizeMode};

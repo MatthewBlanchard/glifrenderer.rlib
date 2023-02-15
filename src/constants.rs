@@ -10,15 +10,15 @@ pub const PEN_SIZE: f32 = 1.0;
 pub static OUTLINE_STROKE_THICKNESS: f32 = 1.5 * PEN_SIZE;
 pub static GUIDELINE_THICKNESS: f32 = OUTLINE_STROKE_THICKNESS;
 pub static GRID_THICKNESS: f32 = GUIDELINE_THICKNESS / 2. * PEN_SIZE;
-pub static POINT_STROKE_THICKNESS: f32 = 3. * PEN_SIZE;
+pub static POINT_STROKE_THICKNESS: f32 = 0. * PEN_SIZE;
 pub static DIRECTION_STROKE_THICKNESS: f32 = 2. * PEN_SIZE;
-pub static HANDLE_STROKE_THICKNESS: f32 = 2.5 * PEN_SIZE;
-pub static POINT_RADIUS: f32 = 5. * PEN_SIZE;
+pub static HANDLE_STROKE_THICKNESS: f32 = 2. * PEN_SIZE;
+pub static POINT_RADIUS: f32 = 3. * PEN_SIZE;
 /// Triangles aren't really points, but we internally treat them as such. They represent directions.
 /// Also it's a factor, the area isn't *literally* six pixels even on DPI 1.0 :-)
 pub static TRIANGLE_POINT_AREA: f32 = ((POINT_RADIUS + 1.) * 0.8) * PEN_SIZE;
 pub static HANDLE_RADIUS: f32 = 2.5 * PEN_SIZE;
-pub static HANDLEBAR_THICKNESS: f32 = 3. * PEN_SIZE;
+pub static HANDLEBAR_THICKNESS: f32 = 1. * PEN_SIZE;
 pub static ANCHOR_RADIUS: f32 = 15. * PEN_SIZE;
 pub static ANCHOR_STROKE_THICKNESS: f32 = 3. * PEN_SIZE;
 pub static POINT_LABEL_PADDING: f32 = 3. * PEN_SIZE;
@@ -36,10 +36,13 @@ pub static POINT_ONE_STROKE: u32 = 0xff_1d8a84;
 pub static POINT_TWO_FILL: u32 = 0xff_579aff;
 pub static POINT_TWO_STROKE: u32 = 0xff_4428ec;
 pub static HANDLE_FILL: u32 = 0xff_ff57ee;
-pub static HANDLE_STROKE: u32 = 0xff_b928ec;
-pub static HANDLEBAR_STROKE: u32 = 0xff_7e28ec;
+pub static HANDLE_STROKE: u32 = 0xff_999999;
+pub static HANDLEBAR_STROKE: u32 = 0xff_999999;
 pub static RIB_STROKE: u32 = 0xaa_ff7e7e;
 
+pub struct Style {
+     
+}
 // Can be reused below at your option.
 pub static SELECTED_FILL: u32 = 0xff_ffed50;
 pub static SELECTED_STROKE: u32 = 0xff_ffa115;
@@ -68,7 +71,7 @@ pub static GRID_STROKE: u32 = 0x99_007d7d;
 
 pub static UFO_GUIDELINE_STROKE: u32 = 0xaa_7d0000;
 
-pub static BACKGROUND_COLOR: u32 = 0xff_c4c4c4;
+pub static BACKGROUND_COLOR: u32 = 0xff_dddddd;
 // "Paper" is the preview mode.
 pub static PAPER_BGCOLOR: u32 = 0xff_ffffff;
 // This is the automatic fill. Color (emoji) .glif's, when implemented, will ignore it, and can't
