@@ -134,7 +134,7 @@ pub fn draw_round_point(
 
     paint.set_style(PaintStyle::Stroke);
     paint.set_color(stroke);
-    paint.set_alpha_f(1.);
+    paint.set_alpha_f(alpha);
     canvas.draw_circle((at.0, at.1), radius, &paint);
 }
 
@@ -142,7 +142,7 @@ pub fn draw_square_point(
     at: (f32, f32),
     radius: f32,
     stroke: Color,
-    fill: Color,
+    _fill: Color,
     canvas: &mut Canvas,
     factor: f32,
 ) {
@@ -273,7 +273,7 @@ fn draw_handle<PD: GPPointData>(
         paint.set_style(PaintStyle::StrokeAndFill);
         paint.set_stroke_width(HANDLE_STROKE_THICKNESS * (1. / viewport.factor));
         let radius = POINT_RADIUS * (1. / viewport.factor);
-        let (fill, stroke) = get_handle_stroke_fill(selected);
+        let (_fill, stroke) = get_handle_stroke_fill(selected);
         draw_round_point(at, radius, stroke, 0.5, canvas, viewport.factor);
     }
 }

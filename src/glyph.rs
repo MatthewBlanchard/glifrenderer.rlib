@@ -5,7 +5,7 @@ use crate::{string::UiString, toggles::PreviewMode};
 
 use glifparser::outline::skia::ToSkiaPaths;
 use glifparser::{glif::LayerOperation, MFEKGlif, PointData};
-use skia_safe::{Path, Canvas, Color4f, Handle, Paint, PaintStyle, PathOp, Rect};
+use skia_safe::{Path, Canvas, Color4f, Paint, PaintStyle, PathOp, Rect};
 
 pub fn draw_components<PD: PointData>(
     glyph: &MFEKGlif<PD>,
