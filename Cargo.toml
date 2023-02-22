@@ -12,8 +12,9 @@ glifparser = { path = "../glifparser.rlib", features=["mfek", "skia"] } # for de
 #MFEKmath = { git = "https://github.com/MFEK/math.rlib", branch = "main"}
 MFEKmath = { path = "../math.rlib", features=["skia"] } # for development
 
-skulpin = { git = "https://github.com/MFEK/skulpin" }
-skulpin-renderer = {git = "https://github.com/MFEK/skulpin/"}
+#skulpin = { git = "https://github.com/MFEK/skulpin" }
+#skulpin-renderer = {git = "https://github.com/MFEK/skulpin/"}
+skia-safe = "0.53.0"
 log = "0.4"
 font-kit = "0.10"
 derive_more = "0.99"
