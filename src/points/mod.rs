@@ -1,4 +1,3 @@
-use MFEKmath::mfek::ResolveCubic;
 use glifparser::glif::Layer;
 use glifparser::glif::contour::MFEKContourCommon;
 use glifparser::glif::point::MFEKPointCommon;
@@ -48,7 +47,7 @@ pub fn draw_directions<PD: GPPointData>(
 ) {
     let selected: HashSet<usize> = selected.into_iter().map(|(ci, _pi)| *ci).collect();
     for (ci, c) in layer.outline.iter().enumerate() {
-        drop(c.to_cubic().cubic().unwrap().to_skia_path(None).as_ref().map(|p| {
+        drop(c.cubic().unwrap().to_skia_path(None).as_ref().map(|p| {
             let piter = ContourMeasureIter::from_path(p, false, None);
             for cm in piter {
                 // Get vector and tangent -4 Skia units along the contur
