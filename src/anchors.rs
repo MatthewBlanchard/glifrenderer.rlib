@@ -3,7 +3,7 @@ use super::string::UiString;
 use crate::viewport::Viewport;
 
 use glifparser::{glif::MFEKGlif, Anchor, PointData};
-use skulpin::skia_safe::{Canvas, Paint, PaintStyle, Path as SkPath};
+use skia_safe::{Canvas, Paint, PaintStyle, Path as SkPath};
 
 pub fn draw_anchors<PD: PointData>(glyph: &MFEKGlif<PD>, viewport: &Viewport, canvas: &mut Canvas) {
     for anchor in &glyph.anchors {

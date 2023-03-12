@@ -1,5 +1,5 @@
 use num_traits::Float;
-use skulpin::skia_safe::{
+use skia_safe::{
     Canvas, Font, FontMetrics, FontStyle, Paint, Path, Rect, TextBlob, Typeface, M44,
 };
 
@@ -247,8 +247,8 @@ impl UiString<'_> {
         }
         let center = match self.centered {
             Alignment::Left => 0.,
-            Alignment::Right => (rect.width()),
-            Alignment::Center => (rect.width() / 2.),
+            Alignment::Right => rect.width(),
+            Alignment::Center => rect.width() / 2.,
         };
 
         if let Some(angle) = self.rotation {

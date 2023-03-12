@@ -3,12 +3,11 @@ use crate::viewport::Viewport;
 
 use super::constants::*;
 
-use MFEKmath::rect::FlipIfRequired as _;
-
 use flo_curves as flo;
 use glifparser::{Guideline, GuidelinePoint, IntegerOrFloat};
 use kurbo;
-use skulpin::skia_safe::{self as skia, Canvas, Color, Paint, PaintStyle, Path};
+use skia_safe::{self as skia, Canvas, Color, Paint, PaintStyle, Path};
+use MFEKmath::rect::FlipIfRequired;
 
 // This works by making four infinitely long lines at all edges of the viewport, then considering a
 // guideline, also of infinite length, finding where it intersects with all edges, and drawing it.

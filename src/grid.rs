@@ -1,6 +1,6 @@
 use glifparser::{Guideline, IntegerOrFloat::Float};
 use skia::{Canvas, Color, Paint, PaintStyle, Path};
-use skulpin::skia_safe as skia;
+use skia_safe as skia;
 use MFEKmath::rect::FlipIfRequired as _;
 
 use crate::constants::{GRID_STROKE, GRID_THICKNESS};

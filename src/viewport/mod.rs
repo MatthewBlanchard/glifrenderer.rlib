@@ -1,5 +1,5 @@
 use crate::toggles::{HandleStyle, PointLabels, PreviewMode};
-use skulpin::skia_safe::{Canvas, Matrix};
+use skia_safe::{Canvas, Matrix};
 
 /// This structure represents the current viewport without requiring a reference to the Skia
 /// canvas.
@@ -97,12 +97,14 @@ impl Viewport {
             .map(|inm| Ok(Matrix::concat(&matrix, &inm)))
             .unwrap_or(Err(()))
     }
+
     pub fn as_device_matrix(&self) -> Matrix {
         *(Matrix::default().set_scale_translate(
             (self.factor, -self.factor),
-            (self.offset.0, self.winsize.1 - -self.offset.1),
+            (self.offset.0, self.winsize.1 + self.offset.1),
         ))
     }
+
     fn rebuild(&mut self, matrix: Option<Matrix>) {
         let dmatrix = self.as_device_matrix();
         let matrix = Matrix::concat(
@@ -116,6 +118,7 @@ impl Viewport {
         self.matrix = matrix;
         self.broken = false;
     }
+    
     pub fn redraw(&mut self, canvas: &mut Canvas) {
         if self.broken {
             let diff = self.refresh_from_backing_canvas(canvas);
