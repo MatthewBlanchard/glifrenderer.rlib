@@ -5,10 +5,10 @@ version = 3
 [[package]]
 name = "MFEKmath"
 version = "0.1.1"
-source = "git+https://github.com/MFEK/math.rlib?branch=main#348e36744557c163a888087dd751041594c11a78"
+source = "git+https://github.com/MFEK/math.rlib?branch=main#281c881c51894c0157f3aaefad9400f50222b183"
 dependencies = [
  "flo_curves",
- "glifparser 1.2.8 (git+https://github.com/MFEK/glifparser.rlib?branch=v2)",
+ "glifparser",
  "kurbo 0.9.1",
  "log",
  "plist",
@@ -513,36 +513,14 @@ dependencies = [
 [[package]]
 name = "glifparser"
 version = "1.2.8"
-source = "git+https://github.com/MFEK/glifparser.rlib?branch=master#331bac41e7ee9b4e26ecfcd36107d58436ef0539"
+source = "git+https://github.com/MFEK/glifparser.rlib?branch=master#82b1622081f978f3515dfcdbbef5440abef46308"
 dependencies = [
  "derivative",
  "derive_more",
  "dyn-clone",
  "float-cmp",
  "image",
- "integer_or_float 0.3.2",
- "itertools",
- "kurbo 0.9.1",
- "log",
- "plist",
- "serde",
- "skia-safe",
- "spline 0.2.0",
- "trees",
- "xmltree",
-]
-
-[[package]]
-name = "glifparser"
-version = "1.2.8"
-source = "git+https://github.com/MFEK/glifparser.rlib?branch=v2#e2e600d31e2100167c328ce6d3b986e820e07694"
-dependencies = [
- "derivative",
- "derive_more",
- "dyn-clone",
- "float-cmp",
- "image",
- "integer_or_float 0.1.5-1",
+ "integer_or_float",
  "itertools",
  "kurbo 0.9.1",
  "log",
@@ -564,7 +542,7 @@ dependencies = [
  "enum-unitary",
  "flo_curves",
  "font-kit",
- "glifparser 1.2.8 (git+https://github.com/MFEK/glifparser.rlib?branch=master)",
+ "glifparser",
  "kurbo 0.8.3",
  "lazy_static",
  "log",
@@ -644,21 +622,6 @@ name = "indoc"
 version = "1.0.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bfa799dd5ed20a7e349f3b4639aa80d74549c81716d9ec4f994c9b5815598306"
-
-[[package]]
-name = "integer_or_float"
-version = "0.1.5-1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e4c938d51818e629bbddf8c62cbdab9d83d91f80a33ea9b9edb92214af4c73dc"
-dependencies = [
- "autocfg",
- "cargo-emit",
- "cfg-if",
- "derive_more",
- "float-cmp",
- "indoc",
- "serde",
-]
 
 [[package]]
 name = "integer_or_float"

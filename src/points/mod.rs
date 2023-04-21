@@ -2,6 +2,8 @@ use glifparser::glif::Layer;
 use glifparser::glif::contour::MFEKContourCommon;
 use glifparser::glif::point::MFEKPointCommon;
 use glifparser::outline::skia::ToSkiaPath;
+use MFEKmath::mfek::ResolveCubic as _;
+
 use skia_safe::{
     Canvas, ContourMeasureIter, Matrix, Paint, PaintStyle, Path as SkPath, Point as SkPoint,
     Rect as SkRect, Vector,
@@ -46,17 +48,15 @@ pub fn draw_directions<PD: GPPointData>(
     only_selected: bool,
 ) {
     let selected: HashSet<usize> = selected.into_iter().map(|(ci, _pi)| *ci).collect();
-    for (ci, c) in layer.outline.iter().enumerate() {
-        drop(c.cubic().unwrap().to_skia_path(None).as_ref().map(|p| {
-            let piter = ContourMeasureIter::from_path(p, false, None);
-            for cm in piter {
-                // Get vector and tangent -4 Skia units along the contur
-                let (vec, tan) = cm.pos_tan(-4.).unwrap();
-                if !only_selected || (only_selected && selected.contains(&ci)) {
-                    draw_triangle_point(viewport, vec, tan, false, canvas);
-                }
+    for (ci, c) in layer.outline.iter().map(|c|c.resolve().1).enumerate() {
+        let piter = ContourMeasureIter::from_path(&c.inner().cubic().unwrap().to_skia_path(None).unwrap(), false, None);
+        for cm in piter {
+            // Get vector and tangent -4 Skia units along the contur
+            let (vec, tan) = cm.pos_tan(-4.).unwrap();
+            if !only_selected || (only_selected && selected.contains(&ci)) {
+                draw_triangle_point(viewport, vec, tan, false, canvas);
             }
-        }));
+        }
     }
 }
 
