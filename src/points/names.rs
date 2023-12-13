@@ -5,7 +5,7 @@ use crate::string::{UiString, AutoSizeMode};
 use crate::toggles::PreviewMode;
 use crate::viewport::Viewport;
 
-pub fn draw_point_str(viewport: &Viewport, at: (f32, f32), s: &str, canvas: &mut Canvas) {
+pub fn draw_point_str(viewport: &Viewport, at: (f32, f32), s: &str, canvas: &Canvas) {
     if viewport.preview_mode == PreviewMode::Paper {
         return;
     }
@@ -13,7 +13,7 @@ pub fn draw_point_str(viewport: &Viewport, at: (f32, f32), s: &str, canvas: &mut
     uis.draw(viewport, at, canvas);
 }
 
-pub fn draw_point_name(viewport: &Viewport, at: (f32, f32), fill: u32, s: &str, canvas: &mut Canvas) {
+pub fn draw_point_name(viewport: &Viewport, at: (f32, f32), fill: u32, s: &str, canvas: &Canvas) {
     if viewport.preview_mode == PreviewMode::Paper {
         return;
     }
@@ -27,7 +27,7 @@ pub fn draw_point_name(viewport: &Viewport, at: (f32, f32), fill: u32, s: &str, 
     uis.draw(viewport, at, canvas);
 }
 
-pub fn draw_point_number(viewport: &Viewport, at: (f32, f32), number: isize, canvas: &mut Canvas) {
+pub fn draw_point_number(viewport: &Viewport, at: (f32, f32), number: isize, canvas: &Canvas) {
     draw_point_str(viewport, at, &number.to_string(), canvas);
 }
 
@@ -35,7 +35,7 @@ pub fn draw_point_location(
     viewport: &Viewport,
     at: (f32, f32),
     original: (f32, f32),
-    canvas: &mut Canvas,
+    canvas: &Canvas,
 ) {
     let s = format!("{}, {}", original.0 as i32, original.1 as i32);
     draw_point_str(viewport, at, &s, canvas);

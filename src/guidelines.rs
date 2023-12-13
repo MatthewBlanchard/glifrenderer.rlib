@@ -13,7 +13,7 @@ use MFEKmath::rect::FlipIfRequired;
 // guideline, also of infinite length, finding where it intersects with all edges, and drawing it.
 pub(crate) fn draw_guideline_impl<PD: glifparser::PointData>(
     viewport: &Viewport,
-    canvas: &mut Canvas,
+    canvas: &Canvas,
     guideline: &Guideline<PD>,
     color: Option<u32>,
     path: &mut Path,
@@ -127,7 +127,7 @@ pub(crate) fn draw_guideline_impl<PD: glifparser::PointData>(
 
 pub fn draw_guideline<PD: glifparser::PointData>(
     viewport: &Viewport,
-    canvas: &mut Canvas,
+    canvas: &Canvas,
     guideline: &Guideline<PD>,
     color: Option<u32>,
 ) {
@@ -144,7 +144,7 @@ pub fn draw_guideline<PD: glifparser::PointData>(
 }
 
 /// Convenience function for drawing the baseline.
-pub fn draw_baseline<PD: glifparser::PointData>(viewport: &Viewport, canvas: &mut Canvas) {
+pub fn draw_baseline<PD: glifparser::PointData>(viewport: &Viewport, canvas: &Canvas) {
     draw_guideline::<PD>(
         viewport,
         canvas,

@@ -43,7 +43,7 @@ impl<PD: GPPointData> SkiaFromGlyph<PD> for SkPoint {
 pub fn draw_directions<PD: GPPointData>(
     viewport: &Viewport,
     layer: &Layer<PD>,
-    canvas: &mut Canvas,
+    canvas: &Canvas,
     selected: &HashSet<(usize, usize)>,
     only_selected: bool,
 ) {
@@ -73,7 +73,7 @@ fn draw_triangle_point(
     at: SkPoint,
     along: Vector,
     selected: bool,
-    canvas: &mut Canvas,
+    canvas: &Canvas,
 ) {
     let (fill, stroke) = get_fill_and_stroke(UIPointType::Direction, selected);
     let factor = viewport.factor;
@@ -127,7 +127,7 @@ pub fn draw_round_point(
     radius: f32,
     stroke: Color,
     alpha: f32,
-    canvas: &mut Canvas,
+    canvas: &Canvas,
     factor: f32,
 ) {
     let mut paint = Paint::default();
@@ -145,7 +145,7 @@ pub fn draw_square_point(
     radius: f32,
     stroke: Color,
     _fill: Color,
-    canvas: &mut Canvas,
+    canvas: &Canvas,
     factor: f32,
 ) {
     let mut paint = Paint::default();
@@ -212,7 +212,7 @@ pub fn draw_point<PD: GPPointData>(
     point: &dyn MFEKPointCommon<PD>,
     number: Option<isize>,
     selected: bool,
-    canvas: &mut Canvas,
+    canvas: &Canvas,
 ) {
     let factor = viewport.factor;
     let at = (point.x(), point.y());
@@ -265,7 +265,7 @@ fn draw_handle<PD: GPPointData>(
     viewport: &Viewport,
     h: GPHandle,
     selected: bool,
-    canvas: &mut Canvas,
+    canvas: &Canvas,
 ) {
     // if the handle is colocated there is nothing to draw
     if let GPHandle::At(x, y) = h {
@@ -284,7 +284,7 @@ pub fn draw_handlebars<PD: GPPointData>(
     viewport: &Viewport,
     point: &dyn MFEKPointCommon<PD>,
     selected: bool,
-    canvas: &mut Canvas,
+    canvas: &Canvas,
 ) {
     let mut path = SkPath::new();
     let mut paint = Paint::default();
@@ -318,7 +318,7 @@ pub fn draw_complete_point<PD: GPPointData>(
     point: &dyn MFEKPointCommon<PD>,
     number: Option<isize>,
     selected: bool,
-    canvas: &mut Canvas,
+    canvas: &Canvas,
 ) {
     draw_point(
         viewport,
@@ -336,7 +336,7 @@ pub fn draw_all<PD: GPPointData>(
     vcidx: Option<usize>,
     vpidx: Option<usize>,
     selected: &HashSet<(usize, usize)>,
-    canvas: &mut Canvas,
+    canvas: &Canvas,
     only_selected: bool,
 ) {
     let mut i: isize = -1;

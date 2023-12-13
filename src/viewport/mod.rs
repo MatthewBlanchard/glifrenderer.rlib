@@ -122,7 +122,7 @@ impl Viewport {
         self.broken = false;
     }
     
-    pub fn redraw(&mut self, canvas: &mut Canvas) {
+    pub fn redraw(&mut self, canvas: &Canvas) {
         if self.broken {
             let diff = self.refresh_from_backing_canvas(canvas);
             log::debug!(

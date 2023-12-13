@@ -33,7 +33,7 @@ impl Style {
 pub fn draw_components<PD: PointData>(
     glyph: &MFEKGlif<PD>,
     viewport: &Viewport,
-    canvas: &mut Canvas,
+    canvas: &Canvas,
 ) {
     let mut paint = Paint::default();
     paint.set_anti_alias(true);
@@ -60,7 +60,7 @@ pub fn draw_components<PD: PointData>(
 
 pub fn draw_layer_group(
     viewport: &Viewport,
-    canvas: &mut Canvas,
+    canvas: &Canvas,
     root_color: Option<Color4f>,
     open_path: &Path,
     closed_path: &Path,
@@ -105,7 +105,7 @@ pub fn draw_layer_group(
 //TODO: pub use crate::events::vws;
 // Before we draw we've got to build a flattened path out of the glyph by resolving
 // each layer operation in turn.
-pub fn draw<PD: PointData>(canvas: &mut Canvas, glyph: &MFEKGlif<PD>, viewport: &Viewport, style: Option<Style>) {
+pub fn draw<PD: PointData>(canvas: &Canvas, glyph: &MFEKGlif<PD>, viewport: &Viewport, style: Option<Style>) {
     let style = if style.is_none() { Style::default() } else { style.unwrap() };
     let mut total_open_path = Path::new();
     let mut total_closed_path = Path::new();

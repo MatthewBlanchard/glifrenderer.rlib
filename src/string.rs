@@ -184,7 +184,7 @@ impl UiString<'_> {
 }
 
 impl UiString<'_> {
-    pub fn draw(&self, viewport: &Viewport, at: (f32, f32), canvas: &mut Canvas) {
+    pub fn draw(&self, viewport: &Viewport, at: (f32, f32), canvas: &Canvas) {
         let matrix = canvas.local_to_device_as_3x3();
         let at = matrix.map_point(at);
         canvas.save();
