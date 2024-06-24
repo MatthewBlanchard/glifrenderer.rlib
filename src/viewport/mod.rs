@@ -99,11 +99,14 @@ impl Viewport {
     }
 
     pub fn as_device_matrix(&self) -> Matrix {
-        *(Matrix::default().set_scale_translate(
-            (self.factor, -self.factor),
-            (self.offset.0, self.winsize.1 + self.offset.1),
-        ))
-    }
+        let half_width = self.winsize.0 / 2.0;
+        let half_height = self.winsize.1 / 2.0;
+        *(Matrix::default()
+            .pre_scale((self.factor, -self.factor), Some(skia_safe::Point::new(half_width, half_height))) // Scale with pivot
+            .pre_translate((self.offset.0 + half_width, half_height - self.offset.1)) // Apply the offset
+        )
+    }    
+    
 
     fn rebuild(&mut self, matrix: Option<Matrix>) {
         let dmatrix = self.as_device_matrix();
@@ -119,7 +122,7 @@ impl Viewport {
         self.broken = false;
     }
     
-    pub fn redraw(&mut self, canvas: &mut Canvas) {
+    pub fn redraw(&mut self, canvas: &Canvas) {
         if self.broken {
             let diff = self.refresh_from_backing_canvas(canvas);
             log::debug!(

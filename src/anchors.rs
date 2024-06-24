@@ -5,13 +5,13 @@ use crate::viewport::Viewport;
 use glifparser::{glif::MFEKGlif, Anchor, PointData};
 use skia_safe::{Canvas, Paint, PaintStyle, Path as SkPath};
 
-pub fn draw_anchors<PD: PointData>(glyph: &MFEKGlif<PD>, viewport: &Viewport, canvas: &mut Canvas) {
+pub fn draw_anchors<PD: PointData>(glyph: &MFEKGlif<PD>, viewport: &Viewport, canvas: &Canvas) {
     for anchor in &glyph.anchors {
         draw_anchor(&anchor, viewport, canvas);
     }
 }
 
-fn draw_anchor<PD: PointData>(anchor: &Anchor<PD>, viewport: &Viewport, canvas: &mut Canvas) {
+fn draw_anchor<PD: PointData>(anchor: &Anchor<PD>, viewport: &Viewport, canvas: &Canvas) {
     let mut path = SkPath::new();
     let (x, y) = (anchor.x, anchor.y);
     let radius = ANCHOR_RADIUS * (1. / viewport.factor);

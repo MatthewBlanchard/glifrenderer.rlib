@@ -2,6 +2,8 @@ use glifparser::glif::Layer;
 use glifparser::glif::contour::MFEKContourCommon;
 use glifparser::glif::point::MFEKPointCommon;
 use glifparser::outline::skia::ToSkiaPath;
+use MFEKmath::mfek::ResolveCubic as _;
+
 use skia_safe::{
     Canvas, ContourMeasureIter, Matrix, Paint, PaintStyle, Path as SkPath, Point as SkPoint,
     Rect as SkRect, Vector,
@@ -41,22 +43,23 @@ impl<PD: GPPointData> SkiaFromGlyph<PD> for SkPoint {
 pub fn draw_directions<PD: GPPointData>(
     viewport: &Viewport,
     layer: &Layer<PD>,
-    canvas: &mut Canvas,
+    canvas: &Canvas,
     selected: &HashSet<(usize, usize)>,
     only_selected: bool,
 ) {
     let selected: HashSet<usize> = selected.into_iter().map(|(ci, _pi)| *ci).collect();
-    for (ci, c) in layer.outline.iter().enumerate() {
-        drop(c.cubic().unwrap().to_skia_path(None).as_ref().map(|p| {
-            let piter = ContourMeasureIter::from_path(p, false, None);
-            for cm in piter {
-                // Get vector and tangent -4 Skia units along the contur
-                let (vec, tan) = cm.pos_tan(-4.).unwrap();
-                if !only_selected || (only_selected && selected.contains(&ci)) {
-                    draw_triangle_point(viewport, vec, tan, false, canvas);
-                }
+    for (ci, c) in layer.outline.iter().map(|c|c.to_cubic()).enumerate() {
+        if c.is_empty() {
+            return
+        }
+        let piter = ContourMeasureIter::from_path(&c.inner().cubic().unwrap().to_skia_path(None).unwrap(), false, None);
+        for cm in piter {
+            // Get vector and tangent -4 Skia units along the contur
+            let (vec, tan) = cm.pos_tan(-4.).unwrap();
+            if !only_selected || (only_selected && selected.contains(&ci)) {
+                draw_triangle_point(viewport, vec, tan, false, canvas);
             }
-        }));
+        }
     }
 }
 
@@ -70,7 +73,7 @@ fn draw_triangle_point(
     at: SkPoint,
     along: Vector,
     selected: bool,
-    canvas: &mut Canvas,
+    canvas: &Canvas,
 ) {
     let (fill, stroke) = get_fill_and_stroke(UIPointType::Direction, selected);
     let factor = viewport.factor;
@@ -124,7 +127,7 @@ pub fn draw_round_point(
     radius: f32,
     stroke: Color,
     alpha: f32,
-    canvas: &mut Canvas,
+    canvas: &Canvas,
     factor: f32,
 ) {
     let mut paint = Paint::default();
@@ -142,7 +145,7 @@ pub fn draw_square_point(
     radius: f32,
     stroke: Color,
     _fill: Color,
-    canvas: &mut Canvas,
+    canvas: &Canvas,
     factor: f32,
 ) {
     let mut paint = Paint::default();
@@ -160,6 +163,25 @@ pub fn draw_square_point(
     canvas.draw_path(&path, &paint);
 }
 
+
+pub fn draw_cross_point(
+    at: (f32, f32),
+    radius: f32,
+    stroke: Color,
+    alpha: f32,
+    canvas: &Canvas,
+    factor: f32,
+) {
+    let mut paint = Paint::default();
+    paint.set_stroke_width(DIRECTION_STROKE_THICKNESS * (1. / factor));
+    paint.set_anti_alias(true);
+
+    paint.set_style(PaintStyle::Stroke);
+    paint.set_color(stroke);
+    paint.set_alpha_f(alpha);
+    canvas.draw_line((at.0 - radius, at.1 - radius), (at.0 + radius, at.1 + radius), &paint);
+    canvas.draw_line((at.0 + radius, at.1 - radius), (at.0 - radius, at.1 + radius), &paint);    
+}
 
 fn get_fill_and_stroke(kind: UIPointType, selected: bool) -> (Color, Color) {
     let (fill, stroke) = if selected {
@@ -209,7 +231,7 @@ pub fn draw_point<PD: GPPointData>(
     point: &dyn MFEKPointCommon<PD>,
     number: Option<isize>,
     selected: bool,
-    canvas: &mut Canvas,
+    canvas: &Canvas,
 ) {
     let factor = viewport.factor;
     let at = (point.x(), point.y());
@@ -224,7 +246,13 @@ pub fn draw_point<PD: GPPointData>(
     let round = point.get_handle_position(WhichHandle::A).is_some() && point.get_handle_position(WhichHandle::B).is_some();
     let (stroke, fill) = get_point_stroke_fill(round, selected);
     if round {
-        draw_round_point(at, radius, fill, 1., canvas, factor);
+        // Hack to differentiate between normal and smooth points. 
+        // TODO: Change to an enum??
+        if point.get_smooth().is_some_and(|s| s == true) {
+            draw_round_point(at, radius, fill, 1., canvas, factor);
+        } else {
+            draw_cross_point(at, radius, fill, 1., canvas, factor);
+        }
     } else {
         draw_square_point(at, radius * 1.25, fill, stroke, canvas, factor);
     }
@@ -262,7 +290,7 @@ fn draw_handle<PD: GPPointData>(
     viewport: &Viewport,
     h: GPHandle,
     selected: bool,
-    canvas: &mut Canvas,
+    canvas: &Canvas,
 ) {
     // if the handle is colocated there is nothing to draw
     if let GPHandle::At(x, y) = h {
@@ -281,7 +309,7 @@ pub fn draw_handlebars<PD: GPPointData>(
     viewport: &Viewport,
     point: &dyn MFEKPointCommon<PD>,
     selected: bool,
-    canvas: &mut Canvas,
+    canvas: &Canvas,
 ) {
     let mut path = SkPath::new();
     let mut paint = Paint::default();
@@ -315,7 +343,7 @@ pub fn draw_complete_point<PD: GPPointData>(
     point: &dyn MFEKPointCommon<PD>,
     number: Option<isize>,
     selected: bool,
-    canvas: &mut Canvas,
+    canvas: &Canvas,
 ) {
     draw_point(
         viewport,
@@ -333,7 +361,7 @@ pub fn draw_all<PD: GPPointData>(
     vcidx: Option<usize>,
     vpidx: Option<usize>,
     selected: &HashSet<(usize, usize)>,
-    canvas: &mut Canvas,
+    canvas: &Canvas,
     only_selected: bool,
 ) {
     let mut i: isize = -1;

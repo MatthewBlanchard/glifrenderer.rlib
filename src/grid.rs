@@ -43,7 +43,7 @@ impl Grid {
     }
 }
 
-pub fn draw(canvas: &mut Canvas, grid: &Grid, viewport: &Viewport) {
+pub fn draw(canvas: &Canvas, grid: &Grid, viewport: &Viewport) {
     if !grid.show {
         return;
     }
